@@ -1,0 +1,9 @@
+Name: singon-ext
+Version: VAR_VERSION
+Date: 2019-04-01
+Author: Singon
+Maintainer: Singon
+Title: Octave extensions
+Description: Various utilities for Octave
+Categories: utils
+License: To be added
