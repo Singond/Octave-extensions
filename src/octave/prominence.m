@@ -5,11 +5,6 @@ function [prom, isol] = prominence(y, idx)
 	## Make sure y is a column vector
 	y = y(:);
 
-	## Pad difference with some value to handle endpoints gracefully
-	#dy = [1; diff(y); -1];
-	## Filter out indices which are not peaks
-	#idx = (dy(idx) >=0) & (dy(idx+1) <= 0);
-
 	if (isscalar(idx))
 		[prom, isol] = prominence_point(y, idx);
 	else
