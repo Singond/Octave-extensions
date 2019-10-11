@@ -1,6 +1,11 @@
 function [prom, isol] = prominence(y, idx)
-	## Make sure y is a column vector
-	y = y(:);
+	if (length(y) < 2)
+		error("Data must have at least two elements");
+	else
+		## Make sure y is a column vector
+		y = y(:);
+	endif
+
 	## Pad difference with some value to handle endpoints gracefully
 	#dy = [1; diff(y); -1];
 	## Filter out indices which are not peaks
@@ -9,7 +14,6 @@ function [prom, isol] = prominence(y, idx)
 	if (isscalar(idx))
 		[prom, isol] = prominence_point(y, idx);
 	endif
-
 endfunction
 
 function [prom, isol] = prominence_point(y, p)
@@ -32,14 +36,38 @@ function [prom, isol] = prominence_point(y, p)
 	else
 		right = length(y);
 	endif
-	prom = 0;
 	isol = [left right];        # The isolation interval of the peak
-	## TODO: Return the actual prominence
+
+	if (left == p)
+		saddle = min(y(p:right));
+	elseif (right == p)
+		saddle = min(y(left:p));
+	else
+		saddle = max(min(y(left:p)), min(y(p:right)));
+	endif
+	prom = y(p) - saddle;
 endfunction
 
+%!# Error detection
 %!error <The value at index 1 is not a peak> prominence([1 2 1],  1);
+%!error <The value at index 2 is not a peak> prominence([2 1 2],  2);
 %!error <The value at index 3 is not a peak> prominence([1 2 1],  3);
 %!
+%!error prominence([1], 1);
+
+%!# Prominence of left edge
+%!assert(prominence([5 4 8 7 2 1 4 2 5 9 1],  1),  1);
+%!assert(prominence([10 4 8 7 2 1 4 2 5 9 1], 1),  9);
+%!
+%!# Prominence of midpoints
+%!assert(prominence([1 4 8 7 2 1 4 2 5 9 1],  3),  7);
+%!assert(prominence([1 4 8 7 2 3 4 2 5 9 1],  3),  6);
+%!assert(prominence([1 4 8 7 2 1 4 2 5 9 1],  7),  2);
+%!assert(prominence([1 4 8 7 2 1 4 2 5 9 1],  10), 8);
+%!
+%!# Prominence of right edge
+%!assert(prominence([1 4 8 7 2 1 4 2 5 9 10], 11), 9);
+
 %!# Extract the isolation interval output value
 %!function isol = isol(y, p)
 %!	[~, isol] = prominence(y, p);
