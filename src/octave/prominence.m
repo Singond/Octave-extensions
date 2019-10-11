@@ -1,10 +1,9 @@
 function [prom, isol] = prominence(y, idx)
 	if (length(y) < 2)
 		error("Data must have at least two elements");
-	else
-		## Make sure y is a column vector
-		y = y(:);
 	endif
+	## Make sure y is a column vector
+	y = y(:);
 
 	## Pad difference with some value to handle endpoints gracefully
 	#dy = [1; diff(y); -1];
@@ -13,6 +12,10 @@ function [prom, isol] = prominence(y, idx)
 
 	if (isscalar(idx))
 		[prom, isol] = prominence_point(y, idx);
+	else
+		[prom, isol] = arrayfun(@(p) prominence(y, p), idx, ...
+				"UniformOutput", false);
+		prom = cell2mat(prom);
 	endif
 endfunction
 
