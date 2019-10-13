@@ -8,7 +8,7 @@ function [prom, isol] = prominence(y, idx)
 	if (isscalar(idx))
 		[prom, isol] = prominence_point(y, idx);
 	else
-		[prom, isol] = arrayfun(@(p) prominence(y, p), idx, ...
+		[prom, isol] = arrayfun(@(p) prominence_point(y, p), idx, ...
 				"UniformOutput", false);
 		prom = cell2mat(prom);
 	endif
