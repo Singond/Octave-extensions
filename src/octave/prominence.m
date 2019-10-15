@@ -2,6 +2,11 @@ function [prom, isol] = prominence(y, idx)
 	if (length(y) < 2)
 		error("Data must have at least two elements");
 	endif
+	if (islogical(loc))
+		idx = find(loc);
+	else
+		idx = loc;
+	endif
 	## Make sure y is a column vector
 	y = y(:);
 
@@ -63,6 +68,10 @@ endfunction
 %!assert(prominence([1 4 8 7 2 1 4 2 5 9 1],  7),  2);
 %!assert(prominence([1 4 8 7 2 1 4 2 5 9 1],  10), 8);
 %!assert(prominence([1 4 8 7 2 1 4 2 5 9 1],  [3 7 10]), [7 2 8]);
+%!test
+%!	A = [1 4 8 7 2 1 4 2 5 9 1];
+%!	assert(prominence(A, A > 7), [7 8]);
+%!	assert(prominence(A, A > 8), 8);
 %!
 %!# Prominence of right edge
 %!assert(prominence([1 4 8 7 2 1 4 2 5 9 10], 11), 9);
