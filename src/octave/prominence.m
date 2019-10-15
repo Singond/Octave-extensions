@@ -1,4 +1,15 @@
-function [prom, isol] = prominence(y, idx)
+## -*- texinfo -*-
+## @deftypefn  {Function file} {prom =} prominence(data, loc)
+## @deftypefnx {Function file} {[prom, isol] =} prominence(data, loc)
+## Return the prominence of peaks at @var{loc} in @var{data}.
+##
+## @var{loc} can be either indices of the peaks in @var{data} or a logical
+## array specifying the peaks.
+##
+## The optional return value @var{isol} is a cell array containing
+## the interval of isolation for each peak.
+## @end deftypefn
+function [prom, isol] = prominence(y, loc)
 	if (length(y) < 2)
 		error("Data must have at least two elements");
 	endif
