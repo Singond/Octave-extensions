@@ -1,5 +1,4 @@
 function [pks, loc] = findpeaksp(varargin)
-#	[~, minslope, minprom] = parseparams(varargin, "Threshold", 0, "MinPeakProminence", 0);
 	p = inputParser();
 	p.FunctionName = "findpeaksp";
 	p.addRequired("data", @isnumeric);
