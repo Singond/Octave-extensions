@@ -44,17 +44,22 @@ function [pks, loc] = findpeaksp(varargin)
 	endif
 endfunction
 
-%!assert(p = findpeaksp([1 2 3], "MinPeakProminence", 0), 3);
-%!assert(p = findpeaksp([3 2 1], "MinPeakProminence", 0), 3);
-%!assert(p = findpeaksp([1 2 1], "MinPeakProminence", 0), 2);
-%!assert(p = findpeaksp([6 3 4], "MinPeakProminence", 0), [6 4]);
+%!# No criteria specified, find all local maxima
+%!assert(p = findpeaksp([1 2 3]), 3);
+%!assert(p = findpeaksp([3 2 1]), 3);
+%!assert(p = findpeaksp([1 2 1]), 2);
+%!assert(p = findpeaksp([6 3 4]), [6 4]);
 
-%!assert(p = findpeaksp([1 2 1 3 1 4 1 5 1 6 1],  "MinPeakProminence", 3), [4 5 6]);
-%!assert(p = findpeaksp([1 2 1 3 1 4 1 5 1 6 1]', "MinPeakProminence", 3), [4 5 6]);
-%!assert(p = findpeaksp([1 2 3 4 5 4 3 2 1],      "MinPeakProminence", 3), 5);
-%!assert(p = findpeaksp([7 8 2 5 3 8 7],          "MinPeakProminence", 2), 5);
-%!assert(p = findpeaksp([6 3 4],                  "MinPeakProminence", 2), 6);
+%!# The output should always be a row vector, regardless of the shape of input
+%!assert(p = findpeaksp([1 4 1 5 1 6 1]'), [4 5 6]);
 
-%!assert(findpeaksp([1 2 1 5 6 5 1 3 1], "MinPeakProminence", 0, "Threshold", 0), [2 6 3]);
-%!assert(findpeaksp([1 2 1 5 6 5 1 3 1], "MinPeakProminence", 0, "Threshold", 1), [2 6 3]);
-%!assert(findpeaksp([1 2 1 5 6 5 1 3 1], "MinPeakProminence", 0, "Threshold", 2), [3]);
+%!# Set minimum prominence
+%!assert(p = findpeaksp([1 2 1 3 1 4 1 5 1 6 1], "MinPeakProminence", 3), [4 5 6]);
+%!assert(p = findpeaksp([1 2 3 4 5 4 3 2 1],     "MinPeakProminence", 3), 5);
+%!assert(p = findpeaksp([7 8 2 5 3 8 7],         "MinPeakProminence", 2), 5);
+%!assert(p = findpeaksp([6 3 4],                 "MinPeakProminence", 2), 6);
+
+%!# Set minimum slope on each side
+%!assert(findpeaksp([1 1.9 1 5 6 5 1 3 1], "Threshold", 0), [1.9 6 3]);
+%!assert(findpeaksp([1 1.9 1 5 6 5 1 3 1], "Threshold", 1), [6 3]);
+%!assert(findpeaksp([1 1.9 1 5 6 5 1 3 1], "Threshold", 2), [3]);
