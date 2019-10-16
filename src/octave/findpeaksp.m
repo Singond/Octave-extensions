@@ -4,18 +4,24 @@ function [pks, loc] = findpeaksp(varargin)
 	p.addRequired("data", @isnumeric);
 	p.addParameter("Threshold", 0, @isscalar);
 	p.addParameter("MinPeakProminence", 0, @isscalar);
+	p.addParameter("Sort", "none", @(s) any(strcmp(s, sortcriteria())));
+	p.addParameter("NPeaks", -1);
+	p.addSwitch("Last");
 	p.parse(varargin{:});
 	r = p.Results;
 	y = r.data;
 	minslope = r.Threshold;
 	minprom = r.MinPeakProminence;
+	sort = r.Sort;
+	npeaks = r.NPeaks;
+	last = r.Last;
 
 	## Ensure y is a row vector
 	if (!isrow(y))
 		y = y(:)';
 	endif
 
-	## Find local maxima
+	## Find local maxima with minimum slope
 	## TODO: Handle flat peaks
 	dy = diff(y);
 	mask = [0 (dy(1:end-1) >= minslope) & (dy(2:end) <= -minslope) 0];
@@ -25,10 +31,29 @@ function [pks, loc] = findpeaksp(varargin)
 
 	## Filter by prominence
 	prom = prominence(y, loc);
-	loc = loc(prom >= minprom);
+	mask = prom >= minprom;
+	loc = loc(mask);
+	prom = prom(mask);
 
-	## Return peak values
-	pks = y(loc);
+	## Sort
+	if (!strcmp(sort, "none"))
+		if (ischar(sort))
+			sortcols = sortcriteria(sort) + 1;
+		elseif (iscell(sort))
+			sortcols = cellfun(@sortcriteria, sort) + 1;
+		endif;
+		[~, sortedrows] = sortrows([loc', y(loc)', prom'], sortcols);
+		loc = loc(sortedrows);
+	endif
+
+	## Select n most (or least, if 'last' is given) important peaks
+	if (npeaks > 0 && npeaks <= length(loc))
+		if (last)
+			loc = loc(1:npeaks);
+		else
+			loc = loc(end + 1 - npeaks:end);
+		endif
+	endif
 
 	## If no output value is requested, display the results in a plot
 	if (nargout == 0)
@@ -37,8 +62,21 @@ function [pks, loc] = findpeaksp(varargin)
 		coloridx = get(gca, "ColorOrderIndex");
 		plot(y);
 		set(gca, "ColorOrderIndex", coloridx);
-		plot(loc, pks, "v", "markerfacecolor", "auto");
+		plot(loc, y(loc), "v", "markerfacecolor", "auto");
 		hold off;
+		return;
+	endif
+
+	## Return peak values
+	pks = y(loc);
+endfunction
+
+function R = sortcriteria(name)
+	persistent sortcriteria = {"value", "prominence"};
+	if (nargin == 0)
+		R = sortcriteria;
+	else
+		R = find(strcmp(sortcriteria, name));
 	endif
 endfunction
 
