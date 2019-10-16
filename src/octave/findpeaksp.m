@@ -38,8 +38,7 @@ function [pks, loc] = findpeaksp(varargin)
 		coloridx = get(gca, "ColorOrderIndex");
 		plot(y);
 		set(gca, "ColorOrderIndex", coloridx);
-		#plot(loc, pks, "v", "linemarkerfacecolor", "auto");
-		plot(loc, pks, "v");
+		plot(loc, pks, "v", "markerfacecolor", "auto");
 		hold off;
 	endif
 endfunction
