@@ -13,8 +13,20 @@ function [pks, loc] = findpeaksp(y, min_prom)
 	prom = prominence(y, loc);
 	loc = loc(prom >= min_prom);
 
-	# Return peak values
+	## Return peak values
 	pks = y(loc);
+
+	## If no output value is requested, display the results in a plot
+	if (nargout == 0)
+		clf;
+		hold on;
+		coloridx = get(gca, "ColorOrderIndex");
+		plot(y);
+		set(gca, "ColorOrderIndex", coloridx);
+		#plot(loc, pks, "v", "linemarkerfacecolor", "auto");
+		plot(loc, pks, "v");
+		hold off;
+	endif
 endfunction
 
 %!assert(findpeaksp([1 2 3], 0), 3);
