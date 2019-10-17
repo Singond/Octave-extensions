@@ -1,3 +1,33 @@
+## -*- texinfo -*-
+## @deftypefn {Function file} {[@var{pks}, @var{locs}] =} findpeaksp(@var{data})
+## @deftypefnx {Function file} {[@dots{}] =} findpeaksp(@dots{}, @var{option}, @dots{})
+## @deftypefnx {Function file} {[@dots{}] =} findpeaksp(@dots{}, @var{param1}, @var{value1}, @dots{})
+## @deftypefnx {Function file} {} findpeaksp(@dots{})
+## Find local maxima in @var{data}.
+##
+## The return value @var{pks} is a row vector of the values of @var{data}
+## at the peaks. The corresponding indices of the peak locations are returned
+## in @var{loc}.
+##
+## @var{option} can be:
+## @itemize
+## @item @code{"Ascending"}
+## @end itemize
+##
+## Named parameters @var{param1}, @var{value1}, @dots{} can be:
+## @itemize
+## @item @code{"Threshold"}
+##
+## @item @code{"MinPeakProminence"}
+##
+## @item @code{"Sort"}
+##
+## @item @code{"NPeaks"}
+## @end itemize
+##
+## When called without output arguments, @code{findpeaksp} plots the data
+## with peaks highlighted.
+## @end deftypefn
 function [pks, loc] = findpeaksp(varargin)
 	p = inputParser();
 	p.FunctionName = "findpeaksp";
