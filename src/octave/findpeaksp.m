@@ -6,7 +6,7 @@ function [pks, loc] = findpeaksp(varargin)
 	p.addParameter("MinPeakProminence", 0, @isscalar);
 	p.addParameter("Sort", "none", @(s) any(strcmp(s, sortcriteria())));
 	p.addParameter("NPeaks", -1);
-	p.addSwitch("Last");
+	p.addSwitch("Ascending");
 	p.parse(varargin{:});
 	r = p.Results;
 	y = r.data;
@@ -14,7 +14,7 @@ function [pks, loc] = findpeaksp(varargin)
 	minprom = r.MinPeakProminence;
 	sort = r.Sort;
 	npeaks = r.NPeaks;
-	last = r.Last;
+	ascending = r.Ascending;
 
 	## Ensure y is a row vector
 	if (!isrow(y))
@@ -42,17 +42,16 @@ function [pks, loc] = findpeaksp(varargin)
 		elseif (iscell(sort))
 			sortcols = cellfun(@sortcriteria, sort) + 1;
 		endif;
+		if (!ascending)
+			sortcols = -sortcols;
+		endif
 		[~, sortedrows] = sortrows([loc', y(loc)', prom'], sortcols);
 		loc = loc(sortedrows);
 	endif
 
 	## Select n most (or least, if 'last' is given) important peaks
 	if (npeaks > 0 && npeaks <= length(loc))
-		if (last)
-			loc = loc(1:npeaks);
-		else
-			loc = loc(end + 1 - npeaks:end);
-		endif
+		loc = loc(1:npeaks);
 	endif
 
 	## If no output value is requested, display the results in a plot
