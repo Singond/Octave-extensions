@@ -109,3 +109,18 @@ endfunction
 %!	assert(p = findpeaksp(Y, "Sort", "prominence"),              [9 6 7 5 8 2]);
 %!	assert(p = findpeaksp(Y, "Sort", "prominence", "ascending"), [2 8 5 7 6 9]);
 %!	assert(p = findpeaksp(Y, "Sort", "prominence", "Npeaks", 3), [9 6 7]);
+
+%!test
+%!	Y = [1 2 1 7 3 9 6 8 7 1 5 2 6 1];
+%!	p = findpeaksp(Y, "MinPeakProminence", 4, "Sort", "value");
+%!	assert(p, [9 7 6]);
+
+%!test
+%!	Y = [1 2 1 7 3 9 6 8 7 1 5 2 6 1];
+%!	p = findpeaksp(Y, "MinPeakProminence", 4, "Sort", "prominence");
+%!	assert(p, [9 6 7]);
+
+%!test
+%!	Y = [1 2 1 7 3 9 6 8 7 1 5 2 6 1];
+%!	p = findpeaksp(Y, "MinPeakProminence", 4, "Sort", "value", "Npeaks", 2);
+%!	assert(p, [9 7]);
