@@ -98,3 +98,14 @@ endfunction
 %!assert(findpeaksp([1 1.9 1 5 6 5 1 3 1], "Threshold", 0), [1.9 6 3]);
 %!assert(findpeaksp([1 1.9 1 5 6 5 1 3 1], "Threshold", 1), [6 3]);
 %!assert(findpeaksp([1 1.9 1 5 6 5 1 3 1], "Threshold", 2), [3]);
+
+%!# Sort by various criteria
+%!test
+%!	Y = [1 2 1 7 3 9 6 8 7 1 5 2 6 1];
+%!	assert(p = findpeaksp(Y),                                    [2 7 9 8 5 6]);
+%!	assert(p = findpeaksp(Y, "Sort", "value"),                   [9 8 7 6 5 2]);
+%!	assert(p = findpeaksp(Y, "Sort", "value", "ascending"),      [2 5 6 7 8 9]);
+%!	assert(p = findpeaksp(Y, "Sort", "value", "NPeaks", 3),      [9 8 7]);
+%!	assert(p = findpeaksp(Y, "Sort", "prominence"),              [9 6 7 5 8 2]);
+%!	assert(p = findpeaksp(Y, "Sort", "prominence", "ascending"), [2 8 5 7 6 9]);
+%!	assert(p = findpeaksp(Y, "Sort", "prominence", "Npeaks", 3), [9 6 7]);
