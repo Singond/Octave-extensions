@@ -83,8 +83,6 @@ function [pks, loc] = findpeaksp(varargin)
 	## TODO: Handle flat peaks
 	dy = diff(y);
 	mask = [0 (dy(1:end-1) >= minslope) & (dy(2:end) <= -minslope) 0];
-	mask(1) = dy(1) <= -minslope;
-	mask(end) = dy(end) >= minslope;
 	loc = find(mask);
 
 	## Filter by prominence
@@ -138,10 +136,11 @@ function R = sortcriteria(name)
 endfunction
 
 %!# No criteria specified, find all local maxima
-%!assert(p = findpeaksp([1 2 3]), 3);
-%!assert(p = findpeaksp([3 2 1]), 3);
+%!assert(p = findpeaksp([1 2 3 1]), 3);
+%!assert(p = findpeaksp([1 3 2 1]), 3);
 %!assert(p = findpeaksp([1 2 1]), 2);
-%!assert(p = findpeaksp([6 3 4]), [6 4]);
+%!assert(p = findpeaksp([1 6 3 4 1]), [6 4]);
+%!assert(isempty(p = findpeaksp([6 3 4])));
 
 %!# The output should always be a row vector, regardless of the shape of input
 %!assert(p = findpeaksp([1 4 1 5 1 6 1]'), [4 5 6]);
@@ -150,7 +149,7 @@ endfunction
 %!assert(p = findpeaksp([1 2 1 3 1 4 1 5 1 6 1], "MinPeakProminence", 3), [4 5 6]);
 %!assert(p = findpeaksp([1 2 3 4 5 4 3 2 1],     "MinPeakProminence", 3), 5);
 %!assert(p = findpeaksp([7 8 2 5 3 8 7],         "MinPeakProminence", 2), 5);
-%!assert(p = findpeaksp([6 3 4],                 "MinPeakProminence", 2), 6);
+%!assert(p = findpeaksp([1 6 3 4],               "MinPeakProminence", 2), 6);
 
 %!# Set minimum slope on each side
 %!assert(findpeaksp([1 1.9 1 5 6 5 1 3 1], "Threshold", 0), [1.9 6 3]);
