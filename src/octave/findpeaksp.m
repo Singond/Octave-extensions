@@ -9,21 +9,49 @@
 ## at the peaks. The corresponding indices of the peak locations are returned
 ## in @var{loc}.
 ##
-## @var{option} can be:
-## @itemize
-## @item @code{"Ascending"}
-## @end itemize
+## Options (@var{option}, @dots{}) are specified after the
+## required arguments. Currently, only the following flag is supported:
+## @table @asis
+## @item Ascending
+## When sorting the peaks in the return value (see below), the default sort
+## order is @emph{descending} (ie. from highest to lowest, from most prominent
+## to least prominent, etc.). Use this switch to reverse that direction.
+## @end table
 ##
-## Named parameters @var{param1}, @var{value1}, @dots{} can be:
-## @itemize
-## @item @code{"Threshold"}
+## Further options can be specified as key-value pairs. In each pair, the
+## parameter name (a string) comes first and is followed by the value of the
+## parameter.
+## The following parameters are recognized:
 ##
-## @item @code{"MinPeakProminence"}
+## @table @asis
+## @item Threshold
+## Minimum height difference from neighbours (non-negative scalar).
+## Use this to return only those peaks whose minimum vertical separation
+## from the neighbouring samples is greater than or equal to this value.
 ##
-## @item @code{"Sort"}
+## @item MinPeakProminence
+## Minimum prominence of a peak (non-negative scalar).
+## The prominence of a peak is the vertical distance between this peak and
+## its highest saddle. A "saddle" is here understood to mean the lowest point
+## on any path leading from the peak to a higher value.
+## Use this parameter to return only those peaks whose prominence is at least
+## the given value.
 ##
-## @item @code{"NPeaks"}
-## @end itemize
+## @item Sort
+## Criterion for sorting the peaks in the returned vector.
+## Can be either @code{"value"} or @code{"prominence"}.
+## If left unspecified, the peaks are sorted by their occurence in @var{data}.
+##
+## @item NPeaks
+## Number of peaks to return (positive integer).
+## When given with a value of @var{n}, @code{findpeaksp} returns only the
+## first @var{n} peaks of those that would be returned otherwise.
+## This is useful in combination with the @code{Sort} parameter and the
+## @code{Ascending} option.
+## For example, using @code{"Sort", "prominence", "NPeaks", 4} will return
+## only the four most prominent peaks. To return the four @emph{least}
+## prominent peaks, add the @code{"Ascending"} option.
+## @end table
 ##
 ## When called without output arguments, @code{findpeaksp} plots the data
 ## with peaks highlighted.
