@@ -107,7 +107,7 @@ function [pks, loc] = findpeaksp(varargin)
 		loc = loc(sortedrows);
 	endif
 
-	## Select n most (or least, if 'last' is given) important peaks
+	## Select the first n peaks in the sorted output
 	if (npeaks > 0 && npeaks <= length(loc))
 		loc = loc(1:npeaks);
 	endif
