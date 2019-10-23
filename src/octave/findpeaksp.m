@@ -135,49 +135,50 @@ function R = sortcriteria(name)
 	endif
 endfunction
 
+%!# Test the return values of findpeaksp
+%!function a(args, pks_exp, loc_exp)
+%!	[pks, loc] = findpeaksp(args{:});
+%!	if (nargin > 1)
+%!		assert(pks, pks_exp);
+%!	endif
+%!	if (nargin > 2)
+%!		assert(loc, loc_exp);
+%!	endif
+%!endfunction
+
 %!# No criteria specified, find all local maxima
-%!assert(p = findpeaksp([1 2 3 1]), 3);
-%!assert(p = findpeaksp([1 3 2 1]), 3);
-%!assert(p = findpeaksp([1 2 1]), 2);
-%!assert(p = findpeaksp([1 6 3 4 1]), [6 4]);
+%!test a({[1 2 3 1]}, 3, 3);
+%!test a({[1 3 2 1]}, 3, 2);
+%!test a({[1 2 1]}, 2, 2);
+%!test a({[1 6 3 4 1]}, [6 4], [2 4]);
 %!assert(isempty(p = findpeaksp([6 3 4])));
 
 %!# The output should always be a row vector, regardless of the shape of input
-%!assert(p = findpeaksp([1 4 1 5 1 6 1]'), [4 5 6]);
+%!test a({[1 4 1 5 1 6 1]'}, [4 5 6], [2 4 6]);
 
 %!# Set minimum prominence
-%!assert(p = findpeaksp([1 2 1 3 1 4 1 5 1 6 1], "MinPeakProminence", 3), [4 5 6]);
-%!assert(p = findpeaksp([1 2 3 4 5 4 3 2 1],     "MinPeakProminence", 3), 5);
-%!assert(p = findpeaksp([7 8 2 5 3 8 7],         "MinPeakProminence", 2), 5);
-%!assert(p = findpeaksp([1 6 3 4],               "MinPeakProminence", 2), 6);
+%!test a({[1 2 1 3 1 4 1 5 1 6 1], "MinPeakProminence", 3}, [4 5 6], [6 8 10]);
+%!test a({[1 2 3 4 5 4 3 2 1],     "MinPeakProminence", 3}, 5, 5);
+%!test a({[7 8 2 5 3 8 7],         "MinPeakProminence", 2}, 5, 4);
+%!test a({[1 6 3 4],               "MinPeakProminence", 2}, 6, 2);
 
 %!# Set minimum slope on each side
-%!assert(findpeaksp([1 1.9 1 5 6 5 1 3 1], "Threshold", 0), [1.9 6 3]);
-%!assert(findpeaksp([1 1.9 1 5 6 5 1 3 1], "Threshold", 1), [6 3]);
-%!assert(findpeaksp([1 1.9 1 5 6 5 1 3 1], "Threshold", 2), [3]);
+%!test a({[1 1.9 1 5 6 5 1 3 1], "Threshold", 0}, [1.9 6 3], [2 5 8]);
+%!test a({[1 1.9 1 5 6 5 1 3 1], "Threshold", 1}, [6 3], [5 8]);
+%!test a({[1 1.9 1 5 6 5 1 3 1], "Threshold", 2}, [3], [8]);
 
 %!# Sort by various criteria
-%!test
+%!shared Y
 %!	Y = [1 2 1 7 3 9 6 8 7 1 5 2 6 1];
-%!	assert(p = findpeaksp(Y),                                    [2 7 9 8 5 6]);
-%!	assert(p = findpeaksp(Y, "Sort", "value"),                   [9 8 7 6 5 2]);
-%!	assert(p = findpeaksp(Y, "Sort", "value", "ascending"),      [2 5 6 7 8 9]);
-%!	assert(p = findpeaksp(Y, "Sort", "value", "NPeaks", 3),      [9 8 7]);
-%!	assert(p = findpeaksp(Y, "Sort", "prominence"),              [9 6 7 5 8 2]);
-%!	assert(p = findpeaksp(Y, "Sort", "prominence", "ascending"), [2 8 5 7 6 9]);
-%!	assert(p = findpeaksp(Y, "Sort", "prominence", "Npeaks", 3), [9 6 7]);
+%!test a({Y},                                    [2 7 9 8 5 6]);
+%!test a({Y, "Sort", "value"},                   [9 8 7 6 5 2]);
+%!test a({Y, "Sort", "value", "ascending"},      [2 5 6 7 8 9]);
+%!test a({Y, "Sort", "value", "NPeaks", 3},      [9 8 7]);
+%!test a({Y, "Sort", "prominence"},              [9 6 7 5 8 2]);
+%!test a({Y, "Sort", "prominence", "ascending"}, [2 8 5 7 6 9]);
+%!test a({Y, "Sort", "prominence", "Npeaks", 3}, [9 6 7]);
 
-%!test
-%!	Y = [1 2 1 7 3 9 6 8 7 1 5 2 6 1];
-%!	p = findpeaksp(Y, "MinPeakProminence", 4, "Sort", "value");
-%!	assert(p, [9 7 6]);
+%!test a({Y, "MinPeakProminence", 4, "Sort", "value"},      [9 7 6]);
+%!test a({Y, "MinPeakProminence", 4, "Sort", "prominence"}, [9 6 7]);
 
-%!test
-%!	Y = [1 2 1 7 3 9 6 8 7 1 5 2 6 1];
-%!	p = findpeaksp(Y, "MinPeakProminence", 4, "Sort", "prominence");
-%!	assert(p, [9 6 7]);
-
-%!test
-%!	Y = [1 2 1 7 3 9 6 8 7 1 5 2 6 1];
-%!	p = findpeaksp(Y, "MinPeakProminence", 4, "Sort", "value", "Npeaks", 2);
-%!	assert(p, [9 7]);
+%!test a({Y, "MinPeakProminence", 4, "Sort", "value", "Npeaks", 2}, [9 7]);
