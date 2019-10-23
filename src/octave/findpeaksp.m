@@ -102,6 +102,9 @@ function [pks, loc] = findpeaksp(varargin)
 	if (minwidth > 0)
 		loc(w(loc) < minwidth) = [];
 	endif
+	if (maxwidth > 0)
+		loc(w(loc) > maxwidth) = [];
+	endif
 
 	## Sort
 	if (!strcmp(sort, "none"))
@@ -189,8 +192,21 @@ endfunction
 %!test a({[1 1.9 1 5 6 5 1 3 1], "Threshold", 2}, [3], [8]);
 
 %!# Filter by peak width
-%!test a({[1 2 0 6 8 6 0], "MinPeakWidth", 2}, 8, 5);
-%!test a({[1 2 0 4 7 0], "MinPeakWidth", 1.5}, 7, 5);
+%!shared Y
+%!	Y = [0 10 0 1 7 8 7 1 0];
+%!test a({Y, "MinPeakWidth", 1}, [10 8], [2 6]);
+%!test a({Y, "MinPeakWidth", 3}, 8, 6);
+%!test a({Y, "MinPeakWidth", 4}, [], []);
+%!test a({Y, "MaxPeakWidth", 3}, [10 8], [2 6]);
+%!test a({Y, "MaxPeakWidth", 1}, 10, 2);
+%!test a({Y, "MaxPeakWidth", 0.5}, [], []);
+%!shared Y
+%!	Y = [0 10 0 1 7 8 7 1 0 10 9 12 11 9 0];
+%!test a({Y},                    [10 8 10 12], [2 6 10 12]);
+%!test a({Y, "MinPeakWidth", 1}, [10 8 12], [2 6 12]);
+%!test a({Y, "MinPeakWidth", 3}, [8 12], [6 12]);
+%!test a({Y, "MinPeakWidth", 4}, [12], [12]);
+%!test a({Y, "MinPeakWidth", 2, "MaxPeakWidth", 4}, 8, 6);
 
 %!# Sort by various criteria
 %!shared Y
