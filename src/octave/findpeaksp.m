@@ -62,6 +62,8 @@ function [pks, loc] = findpeaksp(varargin)
 	p.addRequired("data", @isnumeric);
 	p.addParameter("Threshold", 0, @isscalar);
 	p.addParameter("MinPeakProminence", 0, @isscalar);
+	p.addParameter("MinPeakWidth", -1, @isscalar);
+	p.addParameter("MaxPeakWidth", -1, @isscalar);
 	p.addParameter("Sort", "none", @(s) any(strcmp(s, sortcriteria())));
 	p.addParameter("NPeaks", -1);
 	p.addSwitch("Ascending");
@@ -70,6 +72,8 @@ function [pks, loc] = findpeaksp(varargin)
 	y = r.data;
 	minslope = r.Threshold;
 	minprom = r.MinPeakProminence;
+	minwidth = r.MinPeakWidth;
+	maxwidth = r.MaxPeakWidth;
 	sort = r.Sort;
 	npeaks = r.NPeaks;
 	ascending = r.Ascending;
@@ -88,6 +92,16 @@ function [pks, loc] = findpeaksp(varargin)
 	prom = sparse(length(y), 1);
 	prom(loc) = prominence(y, loc);
 	loc(prom(loc) < minprom) = [];
+
+	if (minwidth > 0 || maxwidth > 0 || nargout > 2)
+		w = sparse(length(y), 1);
+		w(loc) = arrayfun(@(idx) peakwidth([], y, idx, y(idx)-prom(idx)/2), loc);
+	endif
+
+	## Filter by width
+	if (minwidth > 0)
+		loc(w(loc) < minwidth) = [];
+	endif
 
 	## Sort
 	if (!strcmp(sort, "none"))
@@ -155,16 +169,20 @@ endfunction
 %!# The output should always be a row vector, regardless of the shape of input
 %!test a({[1 4 1 5 1 6 1]'}, [4 5 6], [2 4 6]);
 
-%!# Set minimum prominence
+%!# Filter by minimum prominence
 %!test a({[1 2 1 3 1 4 1 5 1 6 1], "MinPeakProminence", 3}, [4 5 6], [6 8 10]);
 %!test a({[1 2 3 4 5 4 3 2 1],     "MinPeakProminence", 3}, 5, 5);
 %!test a({[7 8 2 5 3 8 7],         "MinPeakProminence", 2}, 5, 4);
 %!test a({[1 6 3 4],               "MinPeakProminence", 2}, 6, 2);
 
-%!# Set minimum slope on each side
+%!# Filter by minimum slope on each side
 %!test a({[1 1.9 1 5 6 5 1 3 1], "Threshold", 0}, [1.9 6 3], [2 5 8]);
 %!test a({[1 1.9 1 5 6 5 1 3 1], "Threshold", 1}, [6 3], [5 8]);
 %!test a({[1 1.9 1 5 6 5 1 3 1], "Threshold", 2}, [3], [8]);
+
+%!# Filter by peak width
+%!test a({[1 2 0 6 8 6 0], "MinPeakWidth", 2}, 8, 5);
+%!test a({[1 2 0 4 7 0], "MinPeakWidth", 1.5}, 7, 5);
 
 %!# Sort by various criteria
 %!shared Y
@@ -179,5 +197,4 @@ endfunction
 
 %!test a({Y, "MinPeakProminence", 4, "Sort", "value"},      [9 7 6]);
 %!test a({Y, "MinPeakProminence", 4, "Sort", "prominence"}, [9 6 7]);
-
 %!test a({Y, "MinPeakProminence", 4, "Sort", "value", "Npeaks", 2}, [9 7]);

@@ -1,7 +1,10 @@
 function [w, ext] = peakwidth(x, y, p, h)
+	if (!iscolumn(y))
+		y = y(:);
+	endif
 	## TODO: Enable omitting 'x' altogether
 	if (isempty(x))
-		x = 1:length(y);
+		x = [1:length(y)]';
 	endif
 	if (!size_equal(x, y))
 		error("x and y must have the same size");
