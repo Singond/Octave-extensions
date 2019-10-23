@@ -133,16 +133,20 @@ function [pks, loc] = findpeaksp(varargin)
 	if (nargout == 0)
 		clf;
 		hold on;
+		## Data
 		coloridx = get(gca, "ColorOrderIndex");
 		plot(y);
-		set(gca, "ColorOrderIndex", coloridx);
-		plot(loc, y(loc), "v", "markerfacecolor", "auto");
+		## Annotations
 		if (annotate)
-			b = sparse(loc, 1, y(loc) - prom(loc));
+			## Prominence
+			b = sparse(loc, 1, y(loc) - prom(loc));     # Prominence baseline
 			for idx = loc(:)'
 				line([idx idx], [y(idx) b(idx)], "color", "r");
 			endfor
 		endif
+		## Peaks (plot these at end to make them appear over annotations)
+		set(gca, "ColorOrderIndex", coloridx);
+		plot(loc, y(loc), "v", "markerfacecolor", "auto");
 		hold off;
 		return;
 	endif
