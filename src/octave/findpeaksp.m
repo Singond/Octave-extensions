@@ -67,6 +67,8 @@ function [pks, loc] = findpeaksp(varargin)
 	p.addParameter("Sort", "none", @(s) any(strcmp(s, sortcriteria())));
 	p.addParameter("NPeaks", -1);
 	p.addSwitch("Ascending");
+	## TODO: Make "Annotate" a parameter (see MATLAB implementation)
+	p.addSwitch("Annotate");
 	p.parse(varargin{:});
 	r = p.Results;
 	y = r.data;
@@ -77,6 +79,7 @@ function [pks, loc] = findpeaksp(varargin)
 	sort = r.Sort;
 	npeaks = r.NPeaks;
 	ascending = r.Ascending;
+	annotate = r.Annotate;
 
 	## Ensure y is a column vector
 	if (!iscolumn(y))
@@ -134,6 +137,12 @@ function [pks, loc] = findpeaksp(varargin)
 		plot(y);
 		set(gca, "ColorOrderIndex", coloridx);
 		plot(loc, y(loc), "v", "markerfacecolor", "auto");
+		if (annotate)
+			b = sparse(loc, 1, y(loc) - prom(loc));
+			for idx = loc(:)'
+				line([idx idx], [y(idx) b(idx)], "color", "r");
+			endfor
+		endif
 		hold off;
 		return;
 	endif
