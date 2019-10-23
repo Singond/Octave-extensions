@@ -95,7 +95,8 @@ function [pks, loc] = findpeaksp(varargin)
 
 	if (minwidth > 0 || maxwidth > 0 || nargout > 2)
 		w = sparse(length(y), 1);
-		w(loc) = arrayfun(@(idx) peakwidth([], y, idx, y(idx)-prom(idx)/2), loc);
+		refh = sparse(loc, 1, y(loc) - prom(loc)/2);    # Reference height
+		w(loc) = arrayfun(@(idx) peakwidth(y, idx, refh(idx)), loc);
 	endif
 
 	## Filter by width
