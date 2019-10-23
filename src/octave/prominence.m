@@ -57,7 +57,9 @@ function [prom, isol] = prominence_point(y, p)
 	else
 		right = length(y);
 	endif
-	isol = [left right];        # The isolation interval of the peak
+	if (nargout > 1)
+		isol = [left right];    # The isolation interval of the peak
+	endif
 
 	if (left == p)
 		saddle = min(y(p:right));
