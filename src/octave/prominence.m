@@ -6,20 +6,26 @@
 ## @var{loc} can be either indices of the peaks in @var{data} or a logical
 ## array specifying the peaks.
 ##
-## The optional return value @var{isol} is a cell array containing
-## the interval of isolation for each peak.
+## The optional return value @var{isol} is a two-column matrix containing
+## at each row the interval of isolation of a corresponding peak in @var{prom}.
+## The value in the first column is the lower bound, while the value in the
+## second column is the upper bound of the interval.
 ## @end deftypefn
 function [prom, isol] = prominence(y, loc)
 	if (length(y) < 2)
 		error("Data must have at least two elements");
 	endif
+	## Make sure y is a column vector
+	y = y(:);
+
 	if (islogical(loc))
 		idx = find(loc);
 	else
 		idx = loc;
 	endif
-	## Make sure y is a column vector
-	y = y(:);
+	if (!iscolumn(idx))
+		idx = idx(:);
+	endif
 
 	if (isscalar(idx))
 		[prom, isol] = prominence_point(y, idx);
@@ -27,6 +33,7 @@ function [prom, isol] = prominence(y, loc)
 		[prom, isol] = arrayfun(@(p) prominence_point(y, p), idx, ...
 				"UniformOutput", false);
 		prom = cell2mat(prom);
+		isol = cell2mat(isol);
 	endif
 endfunction
 
@@ -78,10 +85,14 @@ endfunction
 %!assert(prominence([1 4 8 7 2 3 4 2 5 9 1],  3),  6);
 %!assert(prominence([1 4 8 7 2 1 4 2 5 9 1],  7),  2);
 %!assert(prominence([1 4 8 7 2 1 4 2 5 9 1],  10), 8);
-%!assert(prominence([1 4 8 7 2 1 4 2 5 9 1],  [3 7 10]), [7 2 8]);
+%!assert(prominence([1 4 8 7 2 1 4 2 5 9 1],  [3 7 10]),  [7 2 8]');
+%!# Always return column vectors
+%!assert(prominence([1 4 8 7 2 1 4 2 5 9 1],  [3 7 10]'), [7 2 8]');
+%!assert(prominence([1 4 8 7 2 1 4 2 5 9 1]', [3 7 10]),  [7 2 8]');
+%!assert(prominence([1 4 8 7 2 1 4 2 5 9 1]', [3 7 10]'), [7 2 8]');
 %!test
 %!	A = [1 4 8 7 2 1 4 2 5 9 1];
-%!	assert(prominence(A, A > 7), [7 8]);
+%!	assert(prominence(A, A > 7), [7 8]');
 %!	assert(prominence(A, A > 8), 8);
 %!
 %!# Prominence of right edge
@@ -100,7 +111,11 @@ endfunction
 %!assert(isol([1 4 8 7 2 1 4 2 5 9 1],  3),  [1 10]);
 %!assert(isol([1 4 8 7 2 1 4 2 5 9 1],  7),  [4 9]);
 %!assert(isol([1 4 8 7 2 1 4 2 5 9 1],  10), [1 11]);
-%!assert(isol([1 4 8 7 2 1 4 2 5 9 1],  [3 7 10]), {[1 10], [4 9], [1 11]});
+%!assert(isol([1 4 8 7 2 1 4 2 5 9 1],  [3 7 10]),  [1, 10; 4, 9; 1, 11]);
+%!# Always return column vectors
+%!assert(isol([1 4 8 7 2 1 4 2 5 9 1],  [3 7 10]'), [1, 10; 4, 9; 1, 11]);
+%!assert(isol([1 4 8 7 2 1 4 2 5 9 1]', [3 7 10]),  [1, 10; 4, 9; 1, 11]);
+%!assert(isol([1 4 8 7 2 1 4 2 5 9 1]', [3 7 10]'), [1, 10; 4, 9; 1, 11]);
 %!
 %!# Behaviour at right edge
 %!assert(isol([1 4 8 7 2 1 4 2 5 9 10], 11), [1 11]);
