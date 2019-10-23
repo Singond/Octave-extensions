@@ -74,22 +74,20 @@ function [pks, loc] = findpeaksp(varargin)
 	npeaks = r.NPeaks;
 	ascending = r.Ascending;
 
-	## Ensure y is a row vector
-	if (!isrow(y))
-		y = y(:)';
+	## Ensure y is a column vector
+	if (!iscolumn(y))
+		y = y(:);
 	endif
 
 	## Find local maxima with minimum slope
 	## TODO: Handle flat peaks
 	dy = diff(y);
-	mask = [0 (dy(1:end-1) >= minslope) & (dy(2:end) <= -minslope) 0];
-	loc = find(mask);
+	loc = find((dy(1:end-1) >= minslope) & (dy(2:end) <= -minslope)) + 1;
 
 	## Filter by prominence
-	prom = prominence(y, loc);
-	mask = prom >= minprom;
-	loc = loc(mask);
-	prom = prom(mask);
+	prom = sparse(length(y), 1);
+	prom(loc) = prominence(y, loc);
+	loc(prom(loc) < minprom) = [];
 
 	## Sort
 	if (!strcmp(sort, "none"))
@@ -101,7 +99,7 @@ function [pks, loc] = findpeaksp(varargin)
 		if (!ascending)
 			sortcols = -sortcols;
 		endif
-		[~, sortedrows] = sortrows([loc', y(loc)', prom'], sortcols);
+		[~, sortedrows] = sortrows([loc, y(loc), prom(loc)], sortcols);
 		loc = loc(sortedrows);
 	endif
 
@@ -122,8 +120,9 @@ function [pks, loc] = findpeaksp(varargin)
 		return;
 	endif
 
-	## Return peak values
-	pks = y(loc);
+	## Set return values
+	pks = y(loc)';
+	loc = loc';
 endfunction
 
 function R = sortcriteria(name)
