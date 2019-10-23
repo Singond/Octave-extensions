@@ -96,10 +96,15 @@ function [pks, loc] = findpeaksp(varargin)
 	prom(loc) = prominence(y, loc);
 	loc(prom(loc) < minprom) = [];
 
-	if (minwidth > 0 || maxwidth > 0 || nargout > 2)
+	if (minwidth > 0 || maxwidth > 0 || nargout > 2 || annotate)
 		w = sparse(length(y), 1);
 		refh = sparse(loc, 1, y(loc) - prom(loc)/2);    # Reference height
-		w(loc) = arrayfun(@(idx) peakwidth(y, idx, refh(idx)), loc);
+		if (annotate)
+			ext = sparse(length(y), 2);
+			[w(loc), ext(loc,:)] = peakwidth(y, loc, refh(loc));
+		else
+			w(loc) = arrayfun(@(idx) peakwidth(y, idx, refh(idx)), loc);
+		endif
 	endif
 
 	## Filter by width
@@ -138,10 +143,15 @@ function [pks, loc] = findpeaksp(varargin)
 		plot(y);
 		## Annotations
 		if (annotate)
-			## Prominence
+			## Line styles
+			prom_ls = {"color", "r"};
+			width_ls = {"color", [1 0.6 0]};
 			b = sparse(loc, 1, y(loc) - prom(loc));     # Prominence baseline
 			for idx = loc(:)'
-				line([idx idx], [y(idx) b(idx)], "color", "r");
+				## Prominence
+				line([idx idx], [y(idx) b(idx)], prom_ls{:});
+				## Width
+				line(ext(idx,:), [refh(idx) refh(idx)], width_ls{:});
 			endfor
 		endif
 		## Peaks (plot these at end to make them appear over annotations)
