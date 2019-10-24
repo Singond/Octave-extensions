@@ -37,6 +37,17 @@
 ## Use this parameter to return only those peaks whose prominence is at least
 ## the given value.
 ##
+## @item MinPeakWidth
+## Minimum width of a peak (non-negative scalar).
+## The width of a peak is measured at a reference height. By default,
+## this reference height is the half-prominence of the peak in question.
+## Use this parameter to return only peaks with the given width or wider.
+##
+## @item MaxPeakWidth
+## Maximum width of a peak (non-negative scalar).
+## Use this parameter to return only peaks with the given width or narrower.
+## See @code{MinPeakWidth} for more information on how the width is calculated.
+##
 ## @item Sort
 ## Criterion for sorting the peaks in the returned vector.
 ## Can be either @code{"value"} or @code{"prominence"}.
