@@ -257,3 +257,26 @@ endfunction
 %!test a({Y, "MinPeakProminence", 4, "Sort", "value"},      [9 7 6]);
 %!test a({Y, "MinPeakProminence", 4, "Sort", "prominence"}, [9 6 7]);
 %!test a({Y, "MinPeakProminence", 4, "Sort", "value", "Npeaks", 2}, [9 7]);
+
+%!demo
+%! x = 0.1:0.1:100;
+%! p = [12 20 35 50 62 75 92];
+%! s = [ 3  2  4  3  6  4 10];
+%! m = [ 3  2  4  5  4  4  5];
+%! yy = arrayfun(@(p,s,m) m*exp(-(x-p).^2./(2*s^2)), p, s, m, "UniformOutput", false);
+%! y = sum(cell2mat(yy'))';
+%! findpeaksp(y);
+%! #--------------------------------------------------------
+%! # You should now see a signal with seven marked peaks.
+
+%!demo
+%! x = 0.1:0.1:100;
+%! p = [12 20 35 50 62 75 92];
+%! s = [ 3  2  4  3  6  4 10];
+%! m = [ 3  2  4  5  4  4  5];
+%! yy = arrayfun(@(p,s,m) m*exp(-(x-p).^2./(2*s^2)), p, s, m, "UniformOutput", false);
+%! y = sum(cell2mat(yy'))';
+%! findpeaksp(y, "MinPeakProminence", 2, "Annotate");
+%! #--------------------------------------------------------
+%! # You should now see a signal with only the 1st, 3rd and 4th peaks marked
+%! # along with their width and prominence.
