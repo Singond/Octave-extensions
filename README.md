@@ -51,6 +51,7 @@ findpeaksp(y);
 
 A small modification to the above example allows one to select only the peaks
 with prominence equal to or higher than 2:
+
 ```
 ## Generate an example signal by summing several gaussian pulses
 x = 0.1:0.1:100;
@@ -63,4 +64,5 @@ y = sum(cell2mat(yy'))';
 ## Find peaks in the signal and plot the results
 findpeaksp(y, "MinPeakProminence", 2, "Annotate");
 ```
+
 ![Plot of a signal with peaks selected by prominence](doc/findpeaksp-prominence.png)
