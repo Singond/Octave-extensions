@@ -1,3 +1,18 @@
+## -*- texinfo -*-
+## @deftypefn  {Function file} {w =} peakwidth(data, loc, h)
+## @deftypefnx {Function file} {[w, ext] =} peakwidth(data, loc, h)
+## Return the width of peaks located at indices @var{loc} in @var{data},
+## measured at reference height @var{h}.
+##
+## The width of a peak located at a point @var{x} is the distance between the
+## two closest points on either side of @var{x}, where the data crosses
+## a reference horizontal line. The y-value of this line is the reference
+## height. Where the reference line crosses the data in between data points,
+## the point of intersection is determined by linear interpolation.
+##
+## The optional return value @var{ext} is a two column matrix containing the
+## crossing points for each measured peak.
+## @end deftypefn
 function [w, ext] = peakwidth(y, p, h)
 	x = [1:length(y)]';
 	if (!iscolumn(y))
