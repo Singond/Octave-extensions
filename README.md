@@ -7,6 +7,9 @@ functionality found to be missing in the standard libraries.
 Installation
 ============
 
+Manually from source
+--------------------
+
 Clone the repository and run `make install` from the project root.
 This will build the package and install it into your Octave installation.
 
