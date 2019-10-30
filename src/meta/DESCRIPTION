@@ -1,9 +1,9 @@
 Name: singon-ext
 Version: VAR_VERSION
-Date: 2019-04-01
-Author: Singon
-Maintainer: Singon
+Date: 2019-10-30
+Author: Singon <singond@seznam.cz>
+Maintainer: Singon <singond@seznam.cz>
 Title: Octave extensions
 Description: Various utilities for Octave
 Categories: utils
-License: GNU GPL version 3 or later
+License: GPLv3+

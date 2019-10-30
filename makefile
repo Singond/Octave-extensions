@@ -14,7 +14,7 @@
 # along with this program; see the file COPYING.  If not, see
 # <https://www.gnu.org/licenses/>.
 
-VERSION := 0.0.1
+VERSION := 0.1.0
 NAME := singon-ext
 
 DIST_NAME   := ${NAME}-${VERSION}.tar.gz
