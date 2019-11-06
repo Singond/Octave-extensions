@@ -15,8 +15,8 @@
 ## <https://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function file} {prom =} prominence(data, loc)
-## @deftypefnx {Function file} {[prom, isol] =} prominence(data, loc)
+## @deftypefn  {Function file} {@var{prom} =} prominence(@var{data}, @var{loc})
+## @deftypefnx {Function file} {[@var{prom}, @var{isol}] =} prominence(@var{data}, @var{loc})
 ## Return the prominence of peaks at @var{loc} in @var{data}.
 ##
 ## @var{loc} can be either indices of the peaks in @var{data} or a logical
