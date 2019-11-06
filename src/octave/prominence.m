@@ -98,6 +98,12 @@ endfunction
 %!
 %!error prominence([1], 1);
 
+%!# Working with logical array
+%!test
+%!	A = [1 4 8 7 2 1 4 2 5 9 1];
+%!	p = [0 0 1 0 0 0 1 0 0 1 0];
+%!	assert(prominence(A,  logical(p)),  [7 2 8]');
+
 %!# Prominence of left edge
 %!assert(prominence([5 4 8 7 2 1 4 2 5 9 1],  1),  1);
 %!assert(prominence([10 4 8 7 2 1 4 2 5 9 1], 1),  9);
