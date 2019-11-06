@@ -91,7 +91,7 @@ function [pks, loc] = findpeaksp(varargin)
 	p = inputParser();
 	p.FunctionName = "findpeaksp";
 	p.addRequired("data", @isnumeric);
-	p.addParameter("Threshold", 0, @isscalar);
+	p.addParameter("Threshold", -1, @isscalar);
 	p.addParameter("MinPeakProminence", 0, @isscalar);
 	p.addParameter("MinPeakWidth", -1, @isscalar);
 	p.addParameter("MaxPeakWidth", -1, @isscalar);
@@ -103,7 +103,7 @@ function [pks, loc] = findpeaksp(varargin)
 	p.parse(varargin{:});
 	r = p.Results;
 	y = r.data;
-	minslope = r.Threshold;
+	threshold = r.Threshold;
 	minprom = r.MinPeakProminence;
 	minwidth = r.MinPeakWidth;
 	maxwidth = r.MaxPeakWidth;
@@ -117,16 +117,25 @@ function [pks, loc] = findpeaksp(varargin)
 		y = y(:);
 	endif
 
-	## Find local maxima with minimum slope
-	## TODO: Handle flat peaks
+	## Find local maxima
+	##
 	dy = diff(y);
-	loc = find((dy(1:end-1) >= minslope) & (dy(2:end) <= -minslope)) + 1;
+	## Find sharp peaks (they go down on both sides)
+	if (threshold > 0)
+		## Find points whose difference to neighbour is at least 'threshold'
+		loc = find((dy(1:end-1) >= threshold) & (dy(2:end) <= -threshold)) + 1;
+	else
+		## No threshold given, use all points higher than neighbours
+		loc = find((dy(1:end-1) > 0) & (dy(2:end) < 0)) + 1;
+	endif
+	## TODO: Handle flat peaks
 
 	## Filter by prominence
 	prom = sparse(length(y), 1);
 	prom(loc) = prominence(y, loc);
 	loc(prom(loc) < minprom) = [];
 
+	## Calculate width (if required)
 	if (minwidth > 0 || maxwidth > 0 || nargout > 2 || annotate)
 		w = sparse(length(y), 1);
 		refh = sparse(loc, 1, y(loc) - prom(loc)/2);    # Reference height
@@ -234,6 +243,9 @@ endfunction
 
 %!# The output should always be a row vector, regardless of the shape of input
 %!test a({[1 4 1 5 1 6 1]'}, [4 5 6], [2 4 6]);
+
+%!# Handle stationary points gracefully
+%!test a({[2 1 1 1 2]}, [], []);
 
 %!# Filter by minimum prominence
 %!test a({[1 2 1 3 1 4 1 5 1 6 1], "MinPeakProminence", 3}, [4 5 6], [6 8 10]);
