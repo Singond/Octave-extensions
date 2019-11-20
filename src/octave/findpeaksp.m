@@ -87,7 +87,7 @@
 ## Author: Jan "Singon" Slany <singond@seznam.cz>
 ## Created: October 2019
 ## Keywords: signal processing, peak finding
-function [pks, loc] = findpeaksp(varargin)
+function [pks, loc, L, R] = findpeaksp(varargin)
 	p = inputParser();
 	p.FunctionName = "findpeaksp";
 	p.addRequired("data", @isnumeric);
@@ -128,7 +128,24 @@ function [pks, loc] = findpeaksp(varargin)
 		## No threshold given, use all points higher than neighbours
 		loc = find((dy(1:end-1) > 0) & (dy(2:end) < 0)) + 1;
 	endif
-	## TODO: Handle flat peaks
+
+	## Find flat peaks
+	flat_l = [false; (dy(1:end-1) > 0) & (dy(2:end) == 0); false]; # left edges
+	flat_r = [false; (dy(1:end-1) == 0) & (dy(2:end) < 0); false]; # right edges
+	flat_idx = find(flat_l | flat_r);
+	pkidx = find(flat_l(flat_idx)(1:end-1) & flat_r(flat_idx)(2:end));
+	L = flat_idx(pkidx);
+	R = flat_idx(pkidx+1);
+	clear flat_l flat_r flat_idx pkidx;
+
+	## (Alternative implementation)
+	#fl = zeros(size(y), "int8");
+	#fl([false; (dy(1:end-1) > 0) & (dy(2:end) == 0); false]) = 1;
+	#fl([false; (dy(1:end-1) == 0) & (dy(2:end) < 0); false]) = -1;
+	#fli = find(fl);
+	#fli2 = find((fl(fli)(1:end-1) == 1) & (fl(fli)(2:end) == -1));
+	#L = fli(fli2);
+	#R = fli(fli2 + 1);
 
 	## Filter by prominence
 	prom = sparse(length(y), 1);
