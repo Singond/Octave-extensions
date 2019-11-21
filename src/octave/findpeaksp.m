@@ -45,6 +45,20 @@
 ## Use this to return only those peaks whose minimum vertical separation
 ## from the neighbouring samples is greater than or equal to this value.
 ##
+## @item FlatPeaks
+## How to handle flat peaks.
+## Supported values are @qcode{"left"}, @qcode{"right"}, @qcode{"center"}
+## or @qcode{"ignore"}.
+## When a flat peak is encountered, one of the points on the plateau has
+## to be chosen as the location of the peak.
+## The options @qcode{"left"}, @qcode{"right"}, @qcode{"center"} control how
+## this point is chosen: @qcode{"left"} and @qcode{"right"} use the left
+## and right edge, respectively, while @qcode{"center"} tries to find the
+## point nearest to the centre, rounding to nearest integer index if necessary.
+## The @qcode{"ignore"} option discards flat peaks altogether.
+##
+## The default value is @qcode{"left"}.
+##
 ## @item MinPeakProminence
 ## Minimum prominence of a peak (non-negative scalar).
 ## The prominence of a peak is the vertical distance between this peak and
@@ -62,22 +76,27 @@
 ## @item MaxPeakWidth
 ## Maximum width of a peak (non-negative scalar).
 ## Use this parameter to return only peaks with the given width or narrower.
-## See @code{MinPeakWidth} for more information on how the width is calculated.
+## See @qcode{"MinPeakWidth"} for more information on how the width
+## is calculated.
 ##
 ## @item Sort
 ## Criterion for sorting the peaks in the returned vector.
-## Can be either @code{"value"} or @code{"prominence"}.
+## Can be either @qcode{"value"} or @qcode{"prominence"}.
 ## If left unspecified, the peaks are sorted by their occurence in @var{data}.
 ##
 ## @item NPeaks
 ## Number of peaks to return (positive integer).
 ## When given with a value of @var{n}, @code{findpeaksp} returns only the
 ## first @var{n} peaks of those that would be returned otherwise.
-## This is useful in combination with the @code{Sort} parameter and the
-## @code{Ascending} option.
-## For example, using @code{"Sort", "prominence", "NPeaks", 4} will return
-## only the four most prominent peaks. To return the four @emph{least}
-## prominent peaks, add the @code{"Ascending"} option.
+## This is useful in combination with the @qcode{"Sort"} parameter and the
+## @qcode{"Ascending"} option. For example, using
+##
+## @example
+##     findpeaksp(data, "Sort", "prominence", "NPeaks", 4)
+## @end example
+##
+## will return only the four most prominent peaks. To return the four
+## @emph{least} prominent peaks, add the @qcode{"Ascending"} option.
 ## @end table
 ##
 ## When called without output arguments, @code{findpeaksp} plots the data
