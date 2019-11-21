@@ -293,6 +293,8 @@ endfunction
 %!test a({[1 2 3 4 5 4 3 2 1],     "MinPeakProminence", 3}, 5, 5);
 %!test a({[7 8 2 5 3 8 7],         "MinPeakProminence", 2}, 5, 4);
 %!test a({[1 6 3 4],               "MinPeakProminence", 2}, 6, 2);
+%!# With flat peaks
+%!test a({[1 2 1 3 3 1 5 5 1 6 6 1], "MinPeakProminence", 3}, [5 6], [7 10]);
 
 %!# Filter by minimum slope on each side
 %!test a({[1 1.9 1 5 6 5 1 3 1], "Threshold", 0}, [1.9 6 3], [2 5 8]);
@@ -309,6 +311,11 @@ endfunction
 %!test a({Y, "MaxPeakWidth", 3}, [10 8], [2 6]);
 %!test a({Y, "MaxPeakWidth", 1}, 10, 2);
 %!test a({Y, "MaxPeakWidth", 0.5}, [], []);
+%!shared Y
+%!	Y = [0 10 0 7 7 0 2 2 2 0];
+%!test a({Y, "MinPeakWidth", 2}, [7 2], [4 7]);
+%!test a({Y, "MinPeakWidth", 2.5}, [2], [7]);
+%!test a({Y, "MaxPeakWidth", 2}, [10 7], [2 4]);
 %!shared Y
 %!	Y = [0 10 0 1 7 8 7 1 0 10 9 12 11 9 0];
 %!test a({Y},                    [10 8 10 12], [2 6 10 12]);
