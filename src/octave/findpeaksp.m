@@ -87,11 +87,13 @@
 ## Author: Jan "Singon" Slany <singond@seznam.cz>
 ## Created: October 2019
 ## Keywords: signal processing, peak finding
-function [pks, loc, L, R] = findpeaksp(varargin)
+function [pks, loc] = findpeaksp(varargin)
 	p = inputParser();
 	p.FunctionName = "findpeaksp";
 	p.addRequired("data", @isnumeric);
 	p.addParameter("Threshold", -1, @isscalar);
+	p.addParameter("FlatPeaks", "left", ...
+			@(s) any(strcmp(s, {"left", "right", "center", "ignore"})));
 	p.addParameter("MinPeakProminence", 0, @isscalar);
 	p.addParameter("MinPeakWidth", -1, @isscalar);
 	p.addParameter("MaxPeakWidth", -1, @isscalar);
@@ -104,6 +106,7 @@ function [pks, loc, L, R] = findpeaksp(varargin)
 	r = p.Results;
 	y = r.data;
 	threshold = r.Threshold;
+	flatPeaks = r.FlatPeaks;
 	minprom = r.MinPeakProminence;
 	minwidth = r.MinPeakWidth;
 	maxwidth = r.MaxPeakWidth;
@@ -118,34 +121,42 @@ function [pks, loc, L, R] = findpeaksp(varargin)
 	endif
 
 	## Find local maxima
-	##
+
 	dy = diff(y);
 	## Find sharp peaks (they go down on both sides)
 	if (threshold > 0)
 		## Find points whose difference to neighbour is at least 'threshold'
-		loc = find((dy(1:end-1) >= threshold) & (dy(2:end) <= -threshold)) + 1;
+		sh = find((dy(1:end-1) >= threshold) & (dy(2:end) <= -threshold)) + 1;
 	else
 		## No threshold given, use all points higher than neighbours
-		loc = find((dy(1:end-1) > 0) & (dy(2:end) < 0)) + 1;
+		sh = find((dy(1:end-1) > 0) & (dy(2:end) < 0)) + 1;
 	endif
 
 	## Find flat peaks
-	flat_l = [false; (dy(1:end-1) > 0) & (dy(2:end) == 0); false]; # left edges
-	flat_r = [false; (dy(1:end-1) == 0) & (dy(2:end) < 0); false]; # right edges
-	flat_idx = find(flat_l | flat_r);
-	pkidx = find(flat_l(flat_idx)(1:end-1) & flat_r(flat_idx)(2:end));
-	L = flat_idx(pkidx);
-	R = flat_idx(pkidx+1);
-	clear flat_l flat_r flat_idx pkidx;
-
-	## (Alternative implementation)
-	#fl = zeros(size(y), "int8");
-	#fl([false; (dy(1:end-1) > 0) & (dy(2:end) == 0); false]) = 1;
-	#fl([false; (dy(1:end-1) == 0) & (dy(2:end) < 0); false]) = -1;
-	#fli = find(fl);
-	#fli2 = find((fl(fli)(1:end-1) == 1) & (fl(fli)(2:end) == -1));
-	#L = fli(fli2);
-	#R = fli(fli2 + 1);
+	if (!strcmp("ignore", flatPeaks))
+		## Mark plateau edges into "fl". 1 is left edge, -1 is right edge
+		fl = zeros(size(y), "int8");
+		fl((2:end-1)((dy(1:end-1) > 0) & (dy(2:end) == 0))) = 1;
+		fl((2:end-1)((dy(1:end-1) == 0) & (dy(2:end) < 0))) = -1;
+		## Filter-out plateaux which are not peaks
+		fli = find(fl);
+		fli_pk = find((fl(fli)(1:end-1) == 1) & (fl(fli)(2:end) == -1));
+		fll = fli(fli_pk);
+		flr = fli(fli_pk + 1);
+		clear fl fli fli_pk;
+		## Mark each peak with one point only
+		if (strcmp(flatPeaks, "left"))
+			fl = fll;
+		elseif (strcmp(flatPeaks, "right"))
+			fl = flr;
+		elseif (strcmp(flatPeaks, "center"))
+			fl = round(mean([fll flr]')');
+		endif
+	else
+		fl = [];
+	endif
+	## Combine sharp and flat peaks
+	loc = sort([sh; fl]);
 
 	## Filter by prominence
 	prom = sparse(length(y), 1);
@@ -261,8 +272,16 @@ endfunction
 %!# The output should always be a row vector, regardless of the shape of input
 %!test a({[1 4 1 5 1 6 1]'}, [4 5 6], [2 4 6]);
 
-%!# Handle stationary points gracefully
+%!# Handle flat peaks
 %!test a({[2 1 1 1 2]}, [], []);
+%!test a({[1 2 2 1 3 3 3 4 1]}, [2 4], [2 8]);
+%!test a({[1 6 2 4 4 4 2 6 1]}, [6 4 6], [2 4 8]);
+%!shared Y
+%!	Y = [1 2 2 2 1 3 3 1 4 4 5 7 7 4 4 1];
+%!test a({Y},                         [2 3 7], [2 6 12]);
+%!test a({Y, "FlatPeaks", "left"},    [2 3 7], [2 6 12]);
+%!test a({Y, "FlatPeaks", "right"},   [2 3 7], [4 7 13]);
+%!test a({Y, "FlatPeaks", "ignore"},  [], []);
 
 %!# Filter by minimum prominence
 %!test a({[1 2 1 3 1 4 1 5 1 6 1], "MinPeakProminence", 3}, [4 5 6], [6 8 10]);
