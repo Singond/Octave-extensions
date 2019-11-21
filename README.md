@@ -8,7 +8,7 @@ functionality found to be missing in the standard packages.
 Installation
 ============
 
-Manually from source
+From source
 --------------------
 
 Clone the repository and run `make install` from the project root.
@@ -20,7 +20,7 @@ cd Octave-extensions
 make install
 ```
 
-Manually from pre-built package
+From pre-built package
 -------------------------------
 
 Pre-built packages for Octave are available at the
@@ -88,4 +88,4 @@ findpeaksp(y, "MinPeakProminence", 2, "Annotate");
 
 ![Plot of a signal with peaks selected by prominence](doc/findpeaksp-prominence.png)
 
-Here, we have used the option `Annotate` to mark the prominences in the plot.
+Here, we have used the `Annotate` option to mark the prominences in the plot.
