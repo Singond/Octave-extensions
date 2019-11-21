@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Unreleased
-----------
+[0.1.1] - 2019-11-21
+--------------------
 ### Fixed
 - Added support fot flat peaks in the peak finding functions.
   `findpeaksp` and related functions should now no longer crash upon
