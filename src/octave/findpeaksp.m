@@ -136,8 +136,13 @@ function [pks, loc] = findpeaksp(varargin)
 	if (!strcmp("ignore", flatPeaks))
 		## Mark plateau edges into "fl". 1 is left edge, -1 is right edge
 		fl = zeros(size(y), "int8");
-		fl((2:end-1)((dy(1:end-1) > 0) & (dy(2:end) == 0))) = 1;
-		fl((2:end-1)((dy(1:end-1) == 0) & (dy(2:end) < 0))) = -1;
+		if (threshold > 0)
+			fl((2:end-1)((dy(1:end-1) >= threshold) & (dy(2:end) == 0))) = 1;
+			fl((2:end-1)((dy(1:end-1) == 0) & (dy(2:end) <= threshold))) = -1;
+		else
+			fl((2:end-1)((dy(1:end-1) > 0) & (dy(2:end) == 0))) = 1;
+			fl((2:end-1)((dy(1:end-1) == 0) & (dy(2:end) < 0))) = -1;
+		endif
 		## Filter-out plateaux which are not peaks
 		fli = find(fl);
 		fli_pk = find((fl(fli)(1:end-1) == 1) & (fl(fli)(2:end) == -1));
@@ -293,6 +298,7 @@ endfunction
 %!test a({[1 1.9 1 5 6 5 1 3 1], "Threshold", 0}, [1.9 6 3], [2 5 8]);
 %!test a({[1 1.9 1 5 6 5 1 3 1], "Threshold", 1}, [6 3], [5 8]);
 %!test a({[1 1.9 1 5 6 5 1 3 1], "Threshold", 2}, [3], [8]);
+%!test a({[1 2 2 1 4 4 1], "Threshold", 2}, [4], [5]);
 
 %!# Filter by peak width
 %!shared Y
