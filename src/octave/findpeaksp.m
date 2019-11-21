@@ -45,6 +45,20 @@
 ## Use this to return only those peaks whose minimum vertical separation
 ## from the neighbouring samples is greater than or equal to this value.
 ##
+## @item FlatPeaks
+## How to handle flat peaks.
+## Supported values are @qcode{"left"}, @qcode{"right"}, @qcode{"center"}
+## or @qcode{"ignore"}.
+## When a flat peak is encountered, one of the points on the plateau has
+## to be chosen as the location of the peak.
+## The options @qcode{"left"}, @qcode{"right"}, @qcode{"center"} control how
+## this point is chosen: @qcode{"left"} and @qcode{"right"} use the left
+## and right edge, respectively, while @qcode{"center"} tries to find the
+## point nearest to the centre, rounding to nearest integer index if necessary.
+## The @qcode{"ignore"} option discards flat peaks altogether.
+##
+## The default value is @qcode{"left"}.
+##
 ## @item MinPeakProminence
 ## Minimum prominence of a peak (non-negative scalar).
 ## The prominence of a peak is the vertical distance between this peak and
@@ -62,22 +76,27 @@
 ## @item MaxPeakWidth
 ## Maximum width of a peak (non-negative scalar).
 ## Use this parameter to return only peaks with the given width or narrower.
-## See @code{MinPeakWidth} for more information on how the width is calculated.
+## See @qcode{"MinPeakWidth"} for more information on how the width
+## is calculated.
 ##
 ## @item Sort
 ## Criterion for sorting the peaks in the returned vector.
-## Can be either @code{"value"} or @code{"prominence"}.
+## Can be either @qcode{"value"} or @qcode{"prominence"}.
 ## If left unspecified, the peaks are sorted by their occurence in @var{data}.
 ##
 ## @item NPeaks
 ## Number of peaks to return (positive integer).
 ## When given with a value of @var{n}, @code{findpeaksp} returns only the
 ## first @var{n} peaks of those that would be returned otherwise.
-## This is useful in combination with the @code{Sort} parameter and the
-## @code{Ascending} option.
-## For example, using @code{"Sort", "prominence", "NPeaks", 4} will return
-## only the four most prominent peaks. To return the four @emph{least}
-## prominent peaks, add the @code{"Ascending"} option.
+## This is useful in combination with the @qcode{"Sort"} parameter and the
+## @qcode{"Ascending"} option. For example, using
+##
+## @example
+##     findpeaksp(data, "Sort", "prominence", "NPeaks", 4)
+## @end example
+##
+## will return only the four most prominent peaks. To return the four
+## @emph{least} prominent peaks, add the @qcode{"Ascending"} option.
 ## @end table
 ##
 ## When called without output arguments, @code{findpeaksp} plots the data
@@ -91,7 +110,9 @@ function [pks, loc] = findpeaksp(varargin)
 	p = inputParser();
 	p.FunctionName = "findpeaksp";
 	p.addRequired("data", @isnumeric);
-	p.addParameter("Threshold", 0, @isscalar);
+	p.addParameter("Threshold", -1, @isscalar);
+	p.addParameter("FlatPeaks", "left", ...
+			@(s) any(strcmp(s, {"left", "right", "center", "ignore"})));
 	p.addParameter("MinPeakProminence", 0, @isscalar);
 	p.addParameter("MinPeakWidth", -1, @isscalar);
 	p.addParameter("MaxPeakWidth", -1, @isscalar);
@@ -103,11 +124,12 @@ function [pks, loc] = findpeaksp(varargin)
 	p.parse(varargin{:});
 	r = p.Results;
 	y = r.data;
-	minslope = r.Threshold;
+	threshold = r.Threshold;
+	flatPeaks = r.FlatPeaks;
 	minprom = r.MinPeakProminence;
 	minwidth = r.MinPeakWidth;
 	maxwidth = r.MaxPeakWidth;
-	sort = r.Sort;
+	sortby = r.Sort;
 	npeaks = r.NPeaks;
 	ascending = r.Ascending;
 	annotate = r.Annotate;
@@ -117,16 +139,55 @@ function [pks, loc] = findpeaksp(varargin)
 		y = y(:);
 	endif
 
-	## Find local maxima with minimum slope
-	## TODO: Handle flat peaks
+	## Find local maxima
+
 	dy = diff(y);
-	loc = find((dy(1:end-1) >= minslope) & (dy(2:end) <= -minslope)) + 1;
+	## Find sharp peaks (they go down on both sides)
+	if (threshold > 0)
+		## Find points whose difference to neighbour is at least 'threshold'
+		sh = find((dy(1:end-1) >= threshold) & (dy(2:end) <= -threshold)) + 1;
+	else
+		## No threshold given, use all points higher than neighbours
+		sh = find((dy(1:end-1) > 0) & (dy(2:end) < 0)) + 1;
+	endif
+
+	## Find flat peaks
+	if (!strcmp("ignore", flatPeaks))
+		## Mark plateau edges into "fl". 1 is left edge, -1 is right edge
+		fl = zeros(size(y), "int8");
+		if (threshold > 0)
+			fl((2:end-1)((dy(1:end-1) >= threshold) & (dy(2:end) == 0))) = 1;
+			fl((2:end-1)((dy(1:end-1) == 0) & (dy(2:end) <= threshold))) = -1;
+		else
+			fl((2:end-1)((dy(1:end-1) > 0) & (dy(2:end) == 0))) = 1;
+			fl((2:end-1)((dy(1:end-1) == 0) & (dy(2:end) < 0))) = -1;
+		endif
+		## Filter-out plateaux which are not peaks
+		fli = find(fl);
+		fli_pk = find((fl(fli)(1:end-1) == 1) & (fl(fli)(2:end) == -1));
+		fll = fli(fli_pk);
+		flr = fli(fli_pk + 1);
+		clear fl fli fli_pk;
+		## Mark each peak with one point only
+		if (strcmp(flatPeaks, "left"))
+			fl = fll;
+		elseif (strcmp(flatPeaks, "right"))
+			fl = flr;
+		elseif (strcmp(flatPeaks, "center"))
+			fl = round(mean([fll flr]')');
+		endif
+	else
+		fl = [];
+	endif
+	## Combine sharp and flat peaks
+	loc = sort([sh; fl]);
 
 	## Filter by prominence
 	prom = sparse(length(y), 1);
 	prom(loc) = prominence(y, loc);
 	loc(prom(loc) < minprom) = [];
 
+	## Calculate width (if required)
 	if (minwidth > 0 || maxwidth > 0 || nargout > 2 || annotate)
 		w = sparse(length(y), 1);
 		refh = sparse(loc, 1, y(loc) - prom(loc)/2);    # Reference height
@@ -147,11 +208,11 @@ function [pks, loc] = findpeaksp(varargin)
 	endif
 
 	## Sort
-	if (!strcmp(sort, "none"))
-		if (ischar(sort))
-			sortcols = sortcriteria(sort) + 1;
-		elseif (iscell(sort))
-			sortcols = cellfun(@sortcriteria, sort) + 1;
+	if (!strcmp(sortby, "none"))
+		if (ischar(sortby))
+			sortcols = sortcriteria(sortby) + 1;
+		elseif (iscell(sortby))
+			sortcols = cellfun(@sortcriteria, sortby) + 1;
 		endif;
 		if (!ascending)
 			sortcols = -sortcols;
@@ -235,16 +296,30 @@ endfunction
 %!# The output should always be a row vector, regardless of the shape of input
 %!test a({[1 4 1 5 1 6 1]'}, [4 5 6], [2 4 6]);
 
+%!# Handle flat peaks
+%!test a({[2 1 1 1 2]}, [], []);
+%!test a({[1 2 2 1 3 3 3 4 1]}, [2 4], [2 8]);
+%!test a({[1 6 2 4 4 4 2 6 1]}, [6 4 6], [2 4 8]);
+%!shared Y
+%!	Y = [1 2 2 2 1 3 3 1 4 4 5 7 7 4 4 1];
+%!test a({Y},                         [2 3 7], [2 6 12]);
+%!test a({Y, "FlatPeaks", "left"},    [2 3 7], [2 6 12]);
+%!test a({Y, "FlatPeaks", "right"},   [2 3 7], [4 7 13]);
+%!test a({Y, "FlatPeaks", "ignore"},  [], []);
+
 %!# Filter by minimum prominence
 %!test a({[1 2 1 3 1 4 1 5 1 6 1], "MinPeakProminence", 3}, [4 5 6], [6 8 10]);
 %!test a({[1 2 3 4 5 4 3 2 1],     "MinPeakProminence", 3}, 5, 5);
 %!test a({[7 8 2 5 3 8 7],         "MinPeakProminence", 2}, 5, 4);
 %!test a({[1 6 3 4],               "MinPeakProminence", 2}, 6, 2);
+%!# With flat peaks
+%!test a({[1 2 1 3 3 1 5 5 1 6 6 1], "MinPeakProminence", 3}, [5 6], [7 10]);
 
 %!# Filter by minimum slope on each side
 %!test a({[1 1.9 1 5 6 5 1 3 1], "Threshold", 0}, [1.9 6 3], [2 5 8]);
 %!test a({[1 1.9 1 5 6 5 1 3 1], "Threshold", 1}, [6 3], [5 8]);
 %!test a({[1 1.9 1 5 6 5 1 3 1], "Threshold", 2}, [3], [8]);
+%!test a({[1 2 2 1 4 4 1], "Threshold", 2}, [4], [5]);
 
 %!# Filter by peak width
 %!shared Y
@@ -255,6 +330,11 @@ endfunction
 %!test a({Y, "MaxPeakWidth", 3}, [10 8], [2 6]);
 %!test a({Y, "MaxPeakWidth", 1}, 10, 2);
 %!test a({Y, "MaxPeakWidth", 0.5}, [], []);
+%!shared Y
+%!	Y = [0 10 0 7 7 0 2 2 2 0];
+%!test a({Y, "MinPeakWidth", 2}, [7 2], [4 7]);
+%!test a({Y, "MinPeakWidth", 2.5}, [2], [7]);
+%!test a({Y, "MaxPeakWidth", 2}, [10 7], [2 4]);
 %!shared Y
 %!	Y = [0 10 0 1 7 8 7 1 0 10 9 12 11 9 0];
 %!test a({Y},                    [10 8 10 12], [2 6 10 12]);

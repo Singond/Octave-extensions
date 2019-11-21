@@ -15,8 +15,8 @@
 ## <https://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function file} {prom =} prominence(data, loc)
-## @deftypefnx {Function file} {[prom, isol] =} prominence(data, loc)
+## @deftypefn  {Function file} {@var{prom} =} prominence(@var{data}, @var{loc})
+## @deftypefnx {Function file} {[@var{prom}, @var{isol}] =} prominence(@var{data}, @var{loc})
 ## Return the prominence of peaks at @var{loc} in @var{data}.
 ##
 ## @var{loc} can be either indices of the peaks in @var{data} or a logical
@@ -58,10 +58,6 @@ function [prom, isol] = prominence(y, loc)
 endfunction
 
 function [prom, isol] = prominence_point(y, p)
-	if (!((p == 1 || y(p-1) < y(p)) && (p == length(y) || y(p) > y(p+1))))
-		error("The value at index %d is not a peak", p);
-	endif
-
 	## First, determine the isolation interval of the peak.
 	## This is the widest interval in which the peak is the highest value.
 	H = find(y > y(p));         # Indices of points higher than peak
@@ -88,7 +84,11 @@ function [prom, isol] = prominence_point(y, p)
 	else
 		saddle = max(min(y(left:p)), min(y(p:right)));
 	endif
-	prom = y(p) - saddle;
+	if (saddle < y(p))
+		prom = y(p) - saddle;
+	else
+		error("The value at index %d is not a peak", p);
+	endif
 endfunction
 
 %!# Error detection
@@ -97,6 +97,12 @@ endfunction
 %!error <The value at index 3 is not a peak> prominence([1 2 1],  3);
 %!
 %!error prominence([1], 1);
+
+%!# Working with logical array
+%!test
+%!	A = [1 4 8 7 2 1 4 2 5 9 1];
+%!	p = [0 0 1 0 0 0 1 0 0 1 0];
+%!	assert(prominence(A,  logical(p)),  [7 2 8]');
 
 %!# Prominence of left edge
 %!assert(prominence([5 4 8 7 2 1 4 2 5 9 1],  1),  1);
@@ -119,6 +125,12 @@ endfunction
 %!
 %!# Prominence of right edge
 %!assert(prominence([1 4 8 7 2 1 4 2 5 9 10], 11), 9);
+
+%!# Prominence of flat peaks
+%!assert(prominence([1 4 4 1], 2), 3);
+%!assert(prominence([1 4 4 1], 3), 3);
+%!assert(prominence([1 4 4 2 5 1], 3), 2);
+%!error <The value at index 2 is not a peak> prominence([1 4 4 5 1], 2);
 
 %!# Extract the isolation interval output value
 %!function isol = isol(y, p)
