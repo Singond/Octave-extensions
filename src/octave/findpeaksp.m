@@ -107,7 +107,7 @@ function [pks, loc, L, R] = findpeaksp(varargin)
 	minprom = r.MinPeakProminence;
 	minwidth = r.MinPeakWidth;
 	maxwidth = r.MaxPeakWidth;
-	sort = r.Sort;
+	sortby = r.Sort;
 	npeaks = r.NPeaks;
 	ascending = r.Ascending;
 	annotate = r.Annotate;
@@ -173,11 +173,11 @@ function [pks, loc, L, R] = findpeaksp(varargin)
 	endif
 
 	## Sort
-	if (!strcmp(sort, "none"))
-		if (ischar(sort))
-			sortcols = sortcriteria(sort) + 1;
-		elseif (iscell(sort))
-			sortcols = cellfun(@sortcriteria, sort) + 1;
+	if (!strcmp(sortby, "none"))
+		if (ischar(sortby))
+			sortcols = sortcriteria(sortby) + 1;
+		elseif (iscell(sortby))
+			sortcols = cellfun(@sortcriteria, sortby) + 1;
 		endif;
 		if (!ascending)
 			sortcols = -sortcols;
