@@ -1,6 +1,16 @@
 Changelog
 =========
 
+Unreleased
+----------
+### Changed
+- Optimized `findpeaksp` to avoid calculating peak prominence when
+  it is not needed.
+
+### Fixed
+- Fixed a bug caused wherein consecutive flat sections of data were
+  sometimes considered a peak, even when they were not.
+
 [0.1.1] - 2019-11-21
 --------------------
 ### Fixed
