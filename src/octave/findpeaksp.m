@@ -188,13 +188,18 @@ function [pks, loc] = findpeaksp(varargin)
 	## Combine sharp and flat peaks
 	loc = sort([sh; fl]);
 
+	needwidth = minwidth > 0 || maxwidth > 0 || nargout > 2 || annotate;
+	needprom = minprom > 0 || annotate || needwidth || !strcmp(sortby, "none");
+
 	## Filter by prominence
-	prom = sparse(length(y), 1);
-	prom(loc) = prominence(y, loc);
-	loc(prom(loc) < minprom) = [];
+	if (needprom)
+		prom = sparse(length(y), 1);
+		prom(loc) = prominence(y, loc);
+		loc(prom(loc) < minprom) = [];
+	endif
 
 	## Calculate width (if required)
-	if (minwidth > 0 || maxwidth > 0 || nargout > 2 || annotate)
+	if (needwidth)
 		w = sparse(length(y), 1);
 		refh = sparse(loc, 1, y(loc) - prom(loc)/2);    # Reference height
 		if (annotate)
