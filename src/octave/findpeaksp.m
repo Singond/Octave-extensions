@@ -153,18 +153,24 @@ function [pks, loc] = findpeaksp(varargin)
 
 	## Find flat peaks
 	if (!strcmp("ignore", flatPeaks))
-		## Mark plateau edges into "fl". 1 is left edge, -1 is right edge
+		## Mark plateau edges into "fl":
+		## 1 is left edge after a rise, 2 is right edge before a rise,
+		## 4 is left edge after a drop, 8 is right edge before a drop.
 		fl = zeros(size(y), "int8");
 		if (threshold > 0)
 			fl((2:end-1)((dy(1:end-1) >= threshold) & (dy(2:end) == 0))) = 1;
-			fl((2:end-1)((dy(1:end-1) == 0) & (dy(2:end) <= threshold))) = -1;
+			fl((2:end-1)((dy(1:end-1) == 0) & (dy(2:end) >= threshold))) = 2;
+			fl((2:end-1)((dy(1:end-1) <= threshold) & (dy(2:end) == 0))) = 4;
+			fl((2:end-1)((dy(1:end-1) == 0) & (dy(2:end) <= threshold))) = 8;
 		else
 			fl((2:end-1)((dy(1:end-1) > 0) & (dy(2:end) == 0))) = 1;
-			fl((2:end-1)((dy(1:end-1) == 0) & (dy(2:end) < 0))) = -1;
+			fl((2:end-1)((dy(1:end-1) == 0) & (dy(2:end) > 0))) = 2;
+			fl((2:end-1)((dy(1:end-1) < 0) & (dy(2:end) == 0))) = 4;
+			fl((2:end-1)((dy(1:end-1) == 0) & (dy(2:end) < 0))) = 8;
 		endif
 		## Filter-out plateaux which are not peaks
 		fli = find(fl);
-		fli_pk = find((fl(fli)(1:end-1) == 1) & (fl(fli)(2:end) == -1));
+		fli_pk = find((fl(fli)(1:end-1) == 1) & (fl(fli)(2:end) == 8));
 		fll = fli(fli_pk);
 		flr = fli(fli_pk + 1);
 		clear fl fli fli_pk;
