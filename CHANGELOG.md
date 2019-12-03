@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Unreleased
-----------
+[0.1.2] - 2019-12-03
+--------------------
 ### Changed
 - Optimized `findpeaksp` to avoid calculating peak prominence when
   it is not needed.
