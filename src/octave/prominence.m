@@ -91,6 +91,44 @@ function [prom, isol] = prominence_point(y, p)
 	endif
 endfunction
 
+function [prom, isol] = prominence_vector(y, p)
+	## Data are columns, peaks are a row
+	## Each column calculates prominence of single peak
+
+	## First, determine the isolation interval of the peak.
+	## This is the widest interval in which the peak is the highest value.
+	H = find(y > y(p)');        # Indices of points higher than peak
+	[r c] = ind2sub([rows(y) columns(p)], H);
+	Hleft = H(H < p);           # All higher points left of peak
+	if (!isempty(Hleft))
+		left = max(Hleft);
+	else
+		left = 1;
+	endif
+	Hright = H(H > p);          # All higher points right of peak
+	if (!isempty(Hright))
+		right = min(Hright);
+	else
+		right = length(y);
+	endif
+	if (nargout > 1)
+		isol = [left right];    # The isolation interval of the peak
+	endif
+
+	if (left == p)
+		saddle = min(y(p:right));
+	elseif (right == p)
+		saddle = min(y(left:p));
+	else
+		saddle = max(min(y(left:p)), min(y(p:right)));
+	endif
+	if (saddle < y(p))
+		prom = y(p) - saddle;
+	else
+		error("The value at index %d is not a peak", p);
+	endif
+endfunction
+
 %!# Error detection
 %!error <The value at index 1 is not a peak> prominence([1 2 1],  1);
 %!error <The value at index 2 is not a peak> prominence([2 1 2],  2);
