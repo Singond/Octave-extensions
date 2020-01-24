@@ -1,5 +1,10 @@
 function R = nnzmin(X)
 	M = (X != 0);
+	if (!any(M))
+		## All elements are zeros
+		R = min(X);
+		return;
+	endif
 	Xmax = max(X(M)(:));
 	if (Xmax < 0)
 		## All values are negative, just find the minimum
@@ -31,3 +36,9 @@ endfunction
 %!assert(nnzmin([1 -4 0; -2 5 2]), [-2 -4 2]);
 %!assert(nnzmin([1 -4 0; -2 5 0]), [-2 -4 0]);
 %!assert(nnzmin([-1 -4 0; -2 -5 0]), [-2 -5 0]);
+
+%!# With zeros
+%!assert(nnzmin([0 0]), 0);
+%!assert(nnzmin([0 0; 0 0]), [0 0]);
+%!assert(full(nnzmin(sparse([0 0]))), 0);
+%!assert(full(nnzmin(sparse([0 0; 0 0]))), [0 0]);
