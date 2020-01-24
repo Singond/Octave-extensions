@@ -99,6 +99,13 @@ function [prom, isol] = prominence_vector(y, p)
 	## This is the widest interval in which the peak is the highest value.
 	H = find(y > y(p)');        # Indices of points higher than peak
 	[r c] = ind2sub([rows(y) columns(p)], H);
+	Hleft = sparse(r, c, r < p(c)');
+	Hright = sparse(r, c, r > p(c)');
+
+	L = r < p(c)';              # Point is to the left of c-th peak
+	R = r > p(c)';              # Point is to the right of c-th peak
+
+
 	Hleft = H(H < p);           # All higher points left of peak
 	if (!isempty(Hleft))
 		left = max(Hleft);
