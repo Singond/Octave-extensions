@@ -50,10 +50,7 @@ function [prom, isol] = prominence(y, loc)
 	if (isscalar(idx))
 		[prom, isol] = prominence_point(y, idx);
 	else
-		[prom, isol] = arrayfun(@(p) prominence_point(y, p), idx, ...
-				"UniformOutput", false);
-		prom = cell2mat(prom);
-		isol = cell2mat(isol);
+		[prom, isol] = prominence_vector(y, idx);
 	endif
 endfunction
 
@@ -94,45 +91,37 @@ endfunction
 function [prom, isol] = prominence_vector(y, p)
 	## Data are columns, peaks are a row
 	## Each column calculates prominence of single peak
+	if (!isrow(p))
+		p = p(:)';
+	endif
 
 	## First, determine the isolation interval of the peak.
 	## This is the widest interval in which the peak is the highest value.
-	H = find(y > y(p)');        # Indices of points higher than peak
-	[r c] = ind2sub([rows(y) columns(p)], H);
-	Hleft = sparse(r, c, r < p(c)');
-	Hright = sparse(r, c, r > p(c)');
+	H = find(y > y(p)');                      # Linear indices of higher points
+	nr = rows(y);
+	nc = columns(p);
+	[r c] = ind2sub([nr nc], H);              # Convert to row and col indices
+	Hl = sparse(r, c, (r<p(c)').*r, nr, nc);  # Higher points to the left
+	Hr = sparse(r, c, (r>p(c)').*r, nr, nc);  # Higher points to the right
+	left = full(nnzmax(Hl));                  # Rightmost left higher point
+	left(left == 0) = 1;
+	right = full(nnzmin(Hr));                 # Leftmost right higher point
+	right(right == 0) = length(y);
 
-	L = r < p(c)';              # Point is to the left of c-th peak
-	R = r > p(c)';              # Point is to the right of c-th peak
-
-
-	Hleft = H(H < p);           # All higher points left of peak
-	if (!isempty(Hleft))
-		left = max(Hleft);
-	else
-		left = 1;
-	endif
-	Hright = H(H > p);          # All higher points right of peak
-	if (!isempty(Hright))
-		right = min(Hright);
-	else
-		right = length(y);
-	endif
 	if (nargout > 1)
-		isol = [left right];    # The isolation interval of the peak
+		isol = [left; right]';  # The isolation interval of the peak
 	endif
 
-	if (left == p)
-		saddle = min(y(p:right));
-	elseif (right == p)
-		saddle = min(y(left:p));
-	else
-		saddle = max(min(y(left:p)), min(y(p:right)));
-	endif
-	if (saddle < y(p))
-		prom = y(p) - saddle;
-	else
-		error("The value at index %d is not a peak", p);
+	## The range within the isolation interval for each peak
+	[cc rr] = meshgrid(1:length(p)', 1:max(right(:))');
+	Il = sparse(rr, cc, (rr >= left(cc) & rr < p(cc)).*y(rr));
+	Ir = sparse(rr, cc, (rr <= right(cc) & rr > p(cc)).*y(rr));
+
+	saddle = max([nnzmin(Il); nnzmin(Ir)]);
+	prom = y(p) - saddle';
+	if (any(prom < 0))
+		error("The values at following indices are not peaks: %s\n",...
+			t = disp(find(prom < 0)));
 	endif
 endfunction
 
