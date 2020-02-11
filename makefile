@@ -40,7 +40,7 @@ $(filter-out %/DESCRIPTION %/COPYING,${FILES_META}): ${DIST_TMPDIR}/%: src/meta/
 	@mkdir -p $(dir $@)
 	cp $< $@
 
-${DIST_TMPDIR}/DESCRIPTION: src/meta/DESCRIPTION
+${DIST_TMPDIR}/DESCRIPTION: src/meta/DESCRIPTION makefile
 	@mkdir -p $(dir $@)
 	cp $< $@
 	sed -i "s/VAR_VERSION/${VERSION}/" ${DIST_TMPDIR}/DESCRIPTION
