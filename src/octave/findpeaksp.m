@@ -259,7 +259,13 @@ function [pks, loc] = findpeaksp(varargin)
 		endif
 		## Peaks (plot these at end to make them appear over annotations)
 		set(gca, "ColorOrderIndex", coloridx);
-		plot(loc, y(loc), "v", "markerfacecolor", "auto");
+#		plot(loc, y(loc), "v", "markerfacecolor", "auto");
+		[xp yp] = figcoords(loc, y(loc));
+		peakcolor = get(gca, "ColorOrder")(coloridx,:);
+		for coords = [xp yp]'
+			annotation("arrow", coords(1)([1 1]), [coords(2)+eps coords(2)],...
+				"headstyle", "plain", "color", peakcolor);
+		endfor
 		hold off;
 		return;
 	endif
@@ -276,6 +282,24 @@ function R = sortcriteria(name)
 	else
 		R = find(strcmp(sortcriteria, name));
 	endif
+endfunction
+
+function [xf yf] = figcoords(xa, ya)
+	axp = get(gca, "position");
+	lf = axp(1);
+	bf = axp(2);
+	rf = lf + axp(3);
+	tf = bf + axp(4);
+
+	xl = xlim();
+	yl = ylim();
+	la = xl(1);
+	ra = xl(2);
+	ba = yl(1);
+	ta = yl(2);
+
+	xf = lf + (xa-la).*(rf-lf)./(ra-la);
+	yf = bf + (ya-ba).*(tf-bf)./(ta-ba);
 endfunction
 
 %!# Test the return values of findpeaksp
