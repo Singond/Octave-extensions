@@ -47,14 +47,16 @@ function [prom, isol] = prominence(y, loc)
 		idx = idx(:);
 	endif
 
-	if (isscalar(idx))
-		[prom, isol] = prominence_point(y, idx);
-	else
-		[prom, isol] = arrayfun(@(p) prominence_point(y, p), idx, ...
-				"UniformOutput", false);
-		prom = cell2mat(prom);
-		isol = cell2mat(isol);
-	endif
+	prom = prominence_loop(y);
+
+#	if (isscalar(idx))
+#		[prom, isol] = prominence_point(y, idx);
+#	else
+#		[prom, isol] = arrayfun(@(p) prominence_point(y, p), idx, ...
+#				"UniformOutput", false);
+#		prom = cell2mat(prom);
+#		isol = cell2mat(isol);
+#	endif
 endfunction
 
 function [prom, isol] = prominence_point(y, p)
@@ -89,6 +91,81 @@ function [prom, isol] = prominence_point(y, p)
 	else
 		error("The value at index %d is not a peak", p);
 	endif
+endfunction
+
+function prom = prominence_loop(y)
+[h, pks] = findpeaksp(y);
+[~, vls] = findpeaksp(-y);
+h = h';                         # Heights of peaks
+pks = pks';                     # Indices of peaks
+vls = vls';                     # Indices of valleys between peaks
+
+lpk = [0 1:(length(h)-1)]';     # Index of peak to the left of h
+rpk = [2:(length(h)) 0]';       # Index of peak to the right of h
+
+if (vls(1) > pks(1))
+	## There is no valley before first peak: assume first y-value
+	leftpad = y(1);
+else
+	leftpad = [];
+endif
+if (vls(end) < pks(end))
+	## There is no valley after last peak: assume last y-value
+	rightpad = y(end);
+else
+	rightpad = [];
+endif
+v = [leftpad; y(vls); rightpad];
+lv = v(1:end-1);                # Height of valley to the left of peak
+rv = v(2:end);                  # Height of valley to the right of peak
+
+[~, s] = sort(h);               # Indices of peaks sorted in ascending ord.
+
+prom = zeros(size(h));
+kmax = length(h);
+sk = 1;
+for k = s'
+	# Debug only
+	processed = pks(s(1:sk-1));
+	waiting = pks(s(sk+1:end));
+	plot(y, "", pks(k), y(pks(k)), "rv",...
+		processed, y(processed), "bv", "markerfacecolor", "none",...
+		waiting, y(waiting), "bv");
+	hold on;
+	if (k != 1 && lpk(k) != 0)
+		_l = pks(lpk(k));
+	else
+		_l = 1;
+	endif
+	if (k != kmax && rpk(k) != 0)
+		_r = pks(rpk(k));
+	else
+		_r = length(y);
+	endif
+	plot([_l pks(k)], lv(k)([1 1]), "g");
+	plot([pks(k) _r], rv(k)([1 1]), "g");
+	hold off;
+	sk += 1;
+
+	## Calculate the peak prominence, knowing that neighbouring peaks
+	## are not lower than this one
+	vv = sort([lv(k) rv(k)]);
+	vk = vv(1);                 # Valley to keep
+	key = vv(2);                # Key col for this peak
+	prom(k) = h(k) - key;       # Prominence of this peak
+
+	## Remove the key col from the valley list
+	if (lpk(k) > 0)
+		rv(lpk(k)) = vk;
+		rpk(lpk(k)) = rpk(k);
+#		if (k != kmax)
+#		endif
+	endif
+	if (rpk(k) > 0)
+		lv(rpk(k)) = vk;
+		lpk(rpk(k)) = lpk(k);
+	endif
+endfor
 endfunction
 
 %!# Error detection
