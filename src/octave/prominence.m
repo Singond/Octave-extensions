@@ -148,6 +148,10 @@ function prom = prominence_loop(y)
 		endif
 		plot([_l pks(k)], lv(k)([1 1]), "g");
 		plot([pks(k) _r], rv(k)([1 1]), "g");
+		if (!isempty(vg))
+			fidx = pks(k0:k0+length(vg)-2);
+			plot(fidx, y(fidx), "g+");
+		endif
 		hold off;
 		sk += 1;
 
@@ -183,12 +187,14 @@ function prom = prominence_loop(y)
 			## assuming the current position is the beginning of the
 			## sequence of equally high peaks.
 			warning("Peak %d has the same height as peak %d\n", rpk(k), k);
-			hh = find(h > h(k));        # Indices of higher peaks to the right
+			hh = find(h > h(k));        # Indices of higher peaks
 			nhi = min(hh(hh > k));      # Index of next strictly higher peak
 #			if (isempty(nhi))
 #				nhi = peaks(end);
 #			endif
-			vg = [lv(k:nhi); rv(nhi)];
+			f = k:lpk(nhi);
+			f(h(f) < h(k)) = [];        # Indices of peaks in the sequence
+			vg = [lv(f); rv(f(end))];
 			vgi = 1;
 			k0 = k;
 		endif
@@ -201,15 +207,16 @@ function prom = prominence_loop(y)
 
 		if (!rpksame)
 			## Next peak (if any) is higher: terminate special mode...
+			minv = min(vg);             # Lowest valley
 			vg = [];
 			vgi = 0;
 			## ... and remove the whole sequence of peaks/valleys from the list
 			if (lpk(k0) > 0)
-				rv(lpk(k0)) = vk;
+				rv(lpk(k0)) = minv;
 				rpk(lpk(k0)) = rpk(k);
 			endif
 			if (rpk(k) > 0)
-				lv(rpk(k)) = vk;
+				lv(rpk(k)) = minv;
 				lpk(rpk(k)) = lpk(k0);
 			endif
 		else
