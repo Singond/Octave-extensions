@@ -94,78 +94,130 @@ function [prom, isol] = prominence_point(y, p)
 endfunction
 
 function prom = prominence_loop(y)
-[h, pks] = findpeaksp(y);
-[~, vls] = findpeaksp(-y);
-h = h';                         # Heights of peaks
-pks = pks';                     # Indices of peaks
-vls = vls';                     # Indices of valleys between peaks
+	[h, pks] = findpeaksp(y);
+	[~, vls] = findpeaksp(-y);
+	h = h';                         # Heights of peaks
+	pks = pks';                     # Indices of peaks
+	vls = vls';                     # Indices of valleys between peaks
 
-lpk = [0 1:(length(h)-1)]';     # Index of peak to the left of h
-rpk = [2:(length(h)) 0]';       # Index of peak to the right of h
+	lpk = [0 1:(length(h)-1)]';     # Index of peak to the left of h
+	rpk = [2:(length(h)) 0]';       # Index of peak to the right of h
 
-if (vls(1) > pks(1))
-	## There is no valley before first peak: assume first y-value
-	leftpad = y(1);
-else
-	leftpad = [];
-endif
-if (vls(end) < pks(end))
-	## There is no valley after last peak: assume last y-value
-	rightpad = y(end);
-else
-	rightpad = [];
-endif
-v = [leftpad; y(vls); rightpad];
-lv = v(1:end-1);                # Height of valley to the left of peak
-rv = v(2:end);                  # Height of valley to the right of peak
-
-[~, s] = sort(h);               # Indices of peaks sorted in ascending ord.
-
-prom = zeros(size(h));
-kmax = length(h);
-sk = 1;
-for k = s'
-	# Debug only
-	processed = pks(s(1:sk-1));
-	waiting = pks(s(sk+1:end));
-	plot(y, "", pks(k), y(pks(k)), "rv",...
-		processed, y(processed), "bv", "markerfacecolor", "none",...
-		waiting, y(waiting), "bv");
-	hold on;
-	if (k != 1 && lpk(k) != 0)
-		_l = pks(lpk(k));
+	## Pad list of valleys so that every peak has a valley to the left and right
+	if (vls(1) > pks(1))
+		## There is no valley before first peak: assume first y-value
+		leftpad = y(1);
 	else
-		_l = 1;
+		leftpad = [];
 	endif
-	if (k != kmax && rpk(k) != 0)
-		_r = pks(rpk(k));
+	if (vls(end) < pks(end))
+		## There is no valley after last peak: assume last y-value
+		rightpad = y(end);
 	else
-		_r = length(y);
+		rightpad = [];
 	endif
-	plot([_l pks(k)], lv(k)([1 1]), "g");
-	plot([pks(k) _r], rv(k)([1 1]), "g");
-	hold off;
-	sk += 1;
+	v = [leftpad; y(vls); rightpad];
+	lv = v(1:end-1);                # Height of valley to the left of peak
+	rv = v(2:end);                  # Height of valley to the right of peak
 
-	## Calculate the peak prominence, knowing that neighbouring peaks
-	## are not lower than this one
-	vv = sort([lv(k) rv(k)]);
-	vk = vv(1);                 # Valley to keep
-	key = vv(2);                # Key col for this peak
-	prom(k) = h(k) - key;       # Prominence of this peak
+	[~, s] = sort(h);               # Indices of peaks sorted in ascending ord.
 
-	## Remove the key col from the valley list
-	if (lpk(k) > 0)
-		rv(lpk(k)) = vk;
-		rpk(lpk(k)) = rpk(k);
-#		if (k != kmax)
-#		endif
-	endif
-	if (rpk(k) > 0)
-		lv(rpk(k)) = vk;
-		lpk(rpk(k)) = lpk(k);
-	endif
-endfor
+	prom = zeros(size(h));
+	kmax = length(h);
+	sk = 1;
+	vg = [];                    # Valleys around adjacent peaks of equal height
+	vgi = 0;                    # Index of current position in vg
+	k0 = 0;                     # Index of first peak in sequence
+	for k = s'
+		# Debug only
+		processed = pks(s(1:sk-1));
+		waiting = pks(s(sk+1:end));
+		plot(y, "", pks(k), y(pks(k)), "rv",...
+			processed, y(processed), "bv", "markerfacecolor", "none",...
+			waiting, y(waiting), "bv");
+		hold on;
+		if (k != 1 && lpk(k) != 0)
+			_l = pks(lpk(k));
+		else
+			_l = 1;
+		endif
+		if (k != kmax && rpk(k) != 0)
+			_r = pks(rpk(k));
+		else
+			_r = length(y);
+		endif
+		plot([_l pks(k)], lv(k)([1 1]), "g");
+		plot([pks(k) _r], rv(k)([1 1]), "g");
+		hold off;
+		sk += 1;
+
+		## Assume that peak to the left is always higher than current peak
+		## (due to sorting of s and looping from left to right).
+		## Check if peak to the right is strictly higher.
+		rpksame = rpk(k) != 0 && h(rpk(k)) == h(k);
+
+		if (isempty(vg) && !rpksame)
+			## Not in special mode for handling peaks of equal height
+			## and the peak to the right is higher: calculate prominence,
+			## knowing that both neighbouring peaks are higher than this,
+			## ie. that the saddles at each sides are the adjacent valleys.
+			vv = sort([lv(k) rv(k)]);
+			vk = vv(1);                 # Valley to keep
+			key = vv(2);                # Key saddle for this peak
+			prom(k) = h(k) - key;       # Prominence of this peak
+
+			## Remove the key saddle from the valley list
+			if (lpk(k) > 0)
+				rv(lpk(k)) = vk;
+				rpk(lpk(k)) = rpk(k);
+			endif
+			if (rpk(k) > 0)
+				lv(rpk(k)) = vk;
+				lpk(rpk(k)) = lpk(k);
+			endif
+			continue;
+		endif
+
+		if (isempty(vg))
+			## Peak to the right is the same height: start special mode,
+			## assuming the current position is the beginning of the
+			## sequence of equally high peaks.
+			warning("Peak %d has the same height as peak %d\n", rpk(k), k);
+			hh = find(h > h(k));        # Indices of higher peaks to the right
+			nhi = min(hh(hh > k));      # Index of next strictly higher peak
+#			if (isempty(nhi))
+#				nhi = peaks(end);
+#			endif
+			vg = [lv(k:nhi); rv(nhi)];
+			vgi = 1;
+			k0 = k;
+		endif
+
+		## In special mode: evaluating subsequent peaks of equal height
+		lvk = min(vg(1:vgi));
+		rvk = min(vg(vgi+1:end));
+		key = max(lvk, rvk);
+		prom(k) = h(k) - key;
+
+		if (!rpksame)
+			## Next peak (if any) is higher: terminate special mode...
+			vg = [];
+			vgi = 0;
+			## ... and remove the whole sequence of peaks/valleys from the list
+			if (lpk(k0) > 0)
+				rv(lpk(k0)) = vk;
+				rpk(lpk(k0)) = rpk(k);
+			endif
+			if (rpk(k) > 0)
+				lv(rpk(k)) = vk;
+				lpk(rpk(k)) = lpk(k0);
+			endif
+		else
+			## More peaks of this height follow: mark the next position
+			vgi += 1;
+		endif
+
+	endfor
 endfunction
 
 %!# Error detection
