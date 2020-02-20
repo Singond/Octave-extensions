@@ -47,16 +47,35 @@ function [prom, isol] = prominence(y, loc)
 		idx = idx(:);
 	endif
 
-	prom = prominence_loop(y);
+	if (nargout > 1)
+		## If isolation interval is requested, we need the naive algorithm
+		algorithm = "naive";
+	else
+		algorithm = "loopall";
+	endif
 
-#	if (isscalar(idx))
-#		[prom, isol] = prominence_point(y, idx);
-#	else
-#		[prom, isol] = arrayfun(@(p) prominence_point(y, p), idx, ...
-#				"UniformOutput", false);
-#		prom = cell2mat(prom);
-#		isol = cell2mat(isol);
-#	endif
+	switch (algorithm)
+		case "naive"
+			if (isscalar(idx))
+				[prom, isol] = prominence_point(y, idx);
+			else
+				[prom, isol] = arrayfun(@(p) prominence_point(y, p), idx, ...
+						"UniformOutput", false);
+				prom = cell2mat(prom);
+				isol = cell2mat(isol);
+			endif
+		case "loopall"
+			[promall pkloc] = prominence_loop(y);
+			promsparse = zeros(size(y));
+			promsparse(pkloc) = promall;
+			prom = promsparse(loc);
+			badvals = prom == 0;
+			if (any(badvals))
+				error("The value at index %d is not a peak", find(badvals));
+			endif
+		otherwise
+			error("Unknown algorithm name: %s", algorithm);
+	endswitch
 endfunction
 
 function [prom, isol] = prominence_point(y, p)
@@ -93,7 +112,7 @@ function [prom, isol] = prominence_point(y, p)
 	endif
 endfunction
 
-function prom = prominence_loop(y)
+function [prom pks] = prominence_loop(y)
 	[h, pks] = findpeaksp(y);
 	[~, vls] = findpeaksp(-y);
 	h = h';                         # Heights of peaks
