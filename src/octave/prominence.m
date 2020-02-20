@@ -71,7 +71,7 @@ function [prom, isol] = prominence(y, loc)
 			prom = promsparse(loc);
 			badvals = loc(prom == 0);
 			if (!isempty(badvals))
-				error("The value at index %d is not a peak", badvals);
+				error("The value at index %d is not a peak\n", badvals);
 			endif
 		otherwise
 			error("Unknown algorithm name: %s", algorithm);
