@@ -309,6 +309,9 @@ endfunction
 %!#assert(prominence([1 4 4 2 5 1], 3), 2);     # FIXME: Flat peak reported as not a peak
 %!error <The value at index 2 is not a peak> prominence([1 4 4 5 1], 2);
 
+%!# Subsequent peaks of equal height (affects loop algorithm)
+%!assert(prominence([5 6 3 3 7 5 5 7 5 2 7 6 3 4 11 17 8 0]), [1 4 4 4 15]');
+
 %!# Extract the isolation interval output value
 %!function isol = isol(y, p)
 %!	[~, isol] = prominence(y, p);
