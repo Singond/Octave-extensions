@@ -65,7 +65,7 @@ function [prom, isol] = prominence(y, loc)
 				isol = cell2mat(isol);
 			endif
 		case "loopall"
-			[promall pkloc] = prominence_loop(y);
+			[promall pkloc] = prominence_loopall(y);
 			promsparse = zeros(size(y));
 			promsparse(pkloc) = promall;
 			prom = promsparse(loc);
@@ -112,7 +112,7 @@ function [prom, isol] = prominence_point(y, p)
 	endif
 endfunction
 
-function [prom pks] = prominence_loop(y)
+function [prom pks] = prominence_loopall(y)
 	[h, pks] = findpeaksp(y);
 	[~, vls] = findpeaksp(-y);
 
