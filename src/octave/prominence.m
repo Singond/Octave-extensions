@@ -166,36 +166,36 @@ function [prom pks] = prominence_loopall(y)
 
 	key = zeros(size(h));
 	kmax = length(h);
-	sk = 1;
+#	sk = 1;                     # Debug only
 	vg = [];                    # Valleys around adjacent peaks of equal height
 	vgi = 0;                    # Index of current position in vg
 	k0 = 0;                     # Index of first peak in sequence
 	for k = s'
-		# Debug only
-		processed = pks(s(1:sk-1));
-		waiting = pks(s(sk+1:end));
-		plot(y, "", pks(k), y(pks(k)), "rv",...
-			processed, y(processed), "bv", "markerfacecolor", "none",...
-			waiting, y(waiting), "bv");
-		hold on;
-		if (k != 1 && lpk(k) != 0)
-			_l = pks(lpk(k));
-		else
-			_l = 1;
-		endif
-		if (k != kmax && rpk(k) != 0)
-			_r = pks(rpk(k));
-		else
-			_r = length(y);
-		endif
-		plot([_l pks(k)], lv(k)([1 1]), "g");
-		plot([pks(k) _r], rv(k)([1 1]), "g");
-		if (!isempty(vg))
-			fidx = pks(k0:k0+length(vg)-2);
-			plot(fidx, y(fidx), "g+");
-		endif
-		hold off;
-		sk += 1;
+#		# Debug only
+#		processed = pks(s(1:sk-1));
+#		waiting = pks(s(sk+1:end));
+#		plot(y, "", pks(k), y(pks(k)), "rv",...
+#			processed, y(processed), "bv", "markerfacecolor", "none",...
+#			waiting, y(waiting), "bv");
+#		hold on;
+#		if (k != 1 && lpk(k) != 0)
+#			_l = pks(lpk(k));
+#		else
+#			_l = 1;
+#		endif
+#		if (k != kmax && rpk(k) != 0)
+#			_r = pks(rpk(k));
+#		else
+#			_r = length(y);
+#		endif
+#		plot([_l pks(k)], lv(k)([1 1]), "g");
+#		plot([pks(k) _r], rv(k)([1 1]), "g");
+#		if (!isempty(vg))
+#			fidx = pks(k0:k0+length(vg)-2);
+#			plot(fidx, y(fidx), "g+");
+#		endif
+#		hold off;
+#		sk += 1;
 
 		## Assume that peak to the left is always higher than current peak
 		## (due to sorting of s and looping from left to right).
@@ -227,7 +227,7 @@ function [prom pks] = prominence_loopall(y)
 			## Peak to the right is the same height: start special mode,
 			## assuming the current position is the beginning of the
 			## sequence of equally high peaks.
-			warning("Peak %d has the same height as peak %d\n", rpk(k), k);
+#			warning("Peak %d has the same height as peak %d\n", rpk(k), k);
 			hh = find(h > h(k));        # Indices of higher peaks
 			nhi = min(hh(hh > k));      # Index of next strictly higher peak
 #			if (isempty(nhi))
