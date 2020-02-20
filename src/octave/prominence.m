@@ -154,7 +154,7 @@ function [prom pks] = prominence_loop(y)
 
 	[~, s] = sort(h);               # Indices of peaks sorted in ascending ord.
 
-	prom = zeros(size(h));
+	key = zeros(size(h));
 	kmax = length(h);
 	sk = 1;
 	vg = [];                    # Valleys around adjacent peaks of equal height
@@ -199,8 +199,7 @@ function [prom pks] = prominence_loop(y)
 			## ie. that the saddles at each sides are the adjacent valleys.
 			vv = sort([lv(k) rv(k)]);
 			vk = vv(1);                 # Valley to keep
-			key = vv(2);                # Key saddle for this peak
-			prom(k) = h(k) - key;       # Prominence of this peak
+			key(k) = vv(2);             # Key saddle for this peak
 
 			## Remove the key saddle from the valley list
 			if (lpk(k) > 0)
@@ -234,8 +233,7 @@ function [prom pks] = prominence_loop(y)
 		## In special mode: evaluating subsequent peaks of equal height
 		lvk = min(vg(1:vgi));
 		rvk = min(vg(vgi+1:end));
-		key = max(lvk, rvk);
-		prom(k) = h(k) - key;
+		key(k) = max(lvk, rvk);
 
 		if (!rpksame)
 			## Next peak (if any) is higher: terminate special mode...
@@ -255,8 +253,9 @@ function [prom pks] = prominence_loop(y)
 			## More peaks of this height follow: mark the next position
 			vgi += 1;
 		endif
-
 	endfor
+	## Calculate prominence from the key saddle
+	prom = h - key;
 endfunction
 
 %!# Error detection
