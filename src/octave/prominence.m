@@ -69,9 +69,9 @@ function [prom, isol] = prominence(y, loc)
 			promsparse = zeros(size(y));
 			promsparse(pkloc) = promall;
 			prom = promsparse(loc);
-			badvals = prom == 0;
-			if (any(badvals))
-				error("The value at index %d is not a peak", find(badvals));
+			badvals = loc(prom == 0);
+			if (!isempty(badvals))
+				error("The value at index %d is not a peak", badvals);
 			endif
 		otherwise
 			error("Unknown algorithm name: %s", algorithm);
@@ -115,6 +115,13 @@ endfunction
 function [prom pks] = prominence_loop(y)
 	[h, pks] = findpeaksp(y);
 	[~, vls] = findpeaksp(-y);
+
+	## If no peaks are found, return now;
+	if (isempty(pks))
+		prom = [];
+		return;
+	endif
+
 	h = h';                         # Heights of peaks
 	pks = pks';                     # Indices of peaks
 	vls = vls';                     # Indices of valleys between peaks
@@ -123,17 +130,23 @@ function [prom pks] = prominence_loop(y)
 	rpk = [2:(length(h)) 0]';       # Index of peak to the right of h
 
 	## Pad list of valleys so that every peak has a valley to the left and right
-	if (vls(1) > pks(1))
-		## There is no valley before first peak: assume first y-value
+	if (isempty(vls))
+		## Single peak with no valleys around: pad both sides
 		leftpad = y(1);
-	else
-		leftpad = [];
-	endif
-	if (vls(end) < pks(end))
-		## There is no valley after last peak: assume last y-value
 		rightpad = y(end);
 	else
-		rightpad = [];
+		if (vls(1) > pks(1))
+			## There is no valley before first peak: assume first y-value
+			leftpad = y(1);
+		else
+			leftpad = [];
+		endif
+		if (vls(end) < pks(end))
+			## There is no valley after last peak: assume last y-value
+			rightpad = y(end);
+		else
+			rightpad = [];
+		endif
 	endif
 	v = [leftpad; y(vls); rightpad];
 	lv = v(1:end-1);                # Height of valley to the left of peak
