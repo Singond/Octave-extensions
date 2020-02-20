@@ -38,13 +38,15 @@ function [prom, isol] = prominence(y, loc)
 	## Make sure y is a column vector
 	y = y(:);
 
-	if (islogical(loc))
-		idx = find(loc);
+	if (nargin > 1)
+		if (islogical(loc))
+			loc = find(loc);
+		endif
+		if (!iscolumn(loc))
+			loc = loc(:);
+		endif
 	else
-		idx = loc;
-	endif
-	if (!iscolumn(idx))
-		idx = idx(:);
+		loc = [];       # Calculate all peaks
 	endif
 
 	if (nargout > 1)
@@ -56,22 +58,30 @@ function [prom, isol] = prominence(y, loc)
 
 	switch (algorithm)
 		case "naive"
-			if (isscalar(idx))
-				[prom, isol] = prominence_point(y, idx);
+			if (isscalar(loc))
+				[prom, isol] = prominence_point(y, loc);
 			else
-				[prom, isol] = arrayfun(@(p) prominence_point(y, p), idx, ...
+				if (isempty(loc))
+					[~, loc] = findpeaksp(y);
+				endif
+				[prom, isol] = arrayfun(@(p) prominence_point(y, p), loc, ...
 						"UniformOutput", false);
 				prom = cell2mat(prom);
 				isol = cell2mat(isol);
 			endif
 		case "loopall"
-			[promall pkloc] = prominence_loopall(y);
-			promsparse = zeros(size(y));
-			promsparse(pkloc) = promall;
-			prom = promsparse(loc);
-			badvals = loc(prom == 0);
-			if (!isempty(badvals))
-				error("The value at index %d is not a peak\n", badvals);
+			[prom pkloc] = prominence_loopall(y);
+			if (!isempty(loc))
+				## Select only peaks requested in 'loc'
+				promsparse = zeros(size(y));
+				promsparse(pkloc) = prom;
+				prom = promsparse(loc);
+				## Check that every point in 'loc' is a peak
+				## (a peak has positive prominence)
+				badvals = loc(prom <= 0);
+				if (!isempty(badvals))
+					error("The value at index %d is not a peak\n", badvals);
+				endif
 			endif
 		otherwise
 			error("Unknown algorithm name: %s", algorithm);
