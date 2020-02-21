@@ -71,18 +71,48 @@ function [prom, isol] = prominence(y, loc)
 				isol = cell2mat(isol);
 			endif
 		case "loopall"
-			[prom pkloc] = prominence_loopall(y);
+			[prom L] = prominence_loopall(y);
 			if (!isempty(loc))
+				if (any(!ismember(loc, L)))
+					## Some indices in 'loc' were not recognized as peaks.
+					## This may happen even for valid peaks, if the peak
+					## in question is flat and it is referenced by a point
+					## other than its left edge (as done in L).
+					##
+					## Try normalizing indices of flat peaks to their left edge:
+					## Denote the left and right edge of peak as L and R,
+					## respectively. For sharp peaks, the only valid index
+					## is L == R. For flat peaks, valid indices are all
+					## indices L <= index <= R. If an index does not fall
+					## between L and R corresponding to the same peak,
+					## it is not a peak at all.
+
+					## For all indices in 'loc', find the preceding L
+					## and following R.
+					[~, R] = findpeaksp(y, "FlatPeaks", "right");
+					idxl = lookup(L, loc);              # Nearest preceding L
+					idxr = flip(length(R) + 1 ...
+						- lookup(flip([-Inf R]), loc)); # Nearest following R
+					## (idxl and idxr are indices in L, R)
+					validloc = (idxl == idxr & idxl > 0 & idxl <= length(L));
+					if (all(validloc))
+						## All indices in 'loc' are between L and R
+						## corresponding to the same peak, therefore,
+						## they are peaks.
+						## Normalize those to the left edge:
+						loc = L(idxl);
+					else
+						## Some indices in 'loc' are not peaks
+						error("The value at index %d is not a peak\n",...
+							loc(!validloc));
+					endif
+				endif
+
+				assert(all(ismember(loc, L)));
 				## Select only peaks requested in 'loc'
 				promsparse = zeros(size(y));
-				promsparse(pkloc) = prom;
+				promsparse(L) = prom;
 				prom = promsparse(loc);
-				## Check that every point in 'loc' is a peak
-				## (a peak has positive prominence)
-				badvals = loc(prom <= 0);
-				if (!isempty(badvals))
-					error("The value at index %d is not a peak\n", badvals);
-				endif
 			endif
 		otherwise
 			error("Unknown algorithm name: %s", algorithm);
@@ -306,8 +336,18 @@ endfunction
 
 %!# Prominence of flat peaks
 %!assert(prominence([1 4 4 1], 2), 3);
-%!#assert(prominence([1 4 4 1], 3), 3);         # FIXME: Flat peak reported as not a peak
-%!#assert(prominence([1 4 4 2 5 1], 3), 2);     # FIXME: Flat peak reported as not a peak
+%!assert(prominence([1 4 4 1], 3), 3);
+%!error <The value at index 1 is not a peak> prominence([1 4 4 1], 1);
+%!error <The value at index 4 is not a peak> prominence([1 4 4 1], 4);
+%
+%!assert(prominence([1 4 4 2 5 5 1], 2), 2);
+%!assert(prominence([1 4 4 2 5 5 1], 3), 2);
+%!assert(prominence([1 4 4 2 5 5 1], 5), 4);
+%!assert(prominence([1 4 4 2 5 5 1], 6), 4);
+%!error <The value at index 1 is not a peak> prominence([1 4 4 2 5 5 1], 1);
+%!error <The value at index 4 is not a peak> prominence([1 4 4 2 5 5 1], 4);
+%!error <The value at index 7 is not a peak> prominence([1 4 4 2 5 5 1], 7);
+%
 %!error <The value at index 2 is not a peak> prominence([1 4 4 5 1], 2);
 
 %!# Subsequent peaks of equal height (affects loopall algorithm)
