@@ -15,12 +15,13 @@
 ## <https://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function file} {@var{prom} =} prominence(@var{data}, @var{loc})
-## @deftypefnx {Function file} {[@var{prom}, @var{isol}] =} prominence(@var{data}, @var{loc})
+## @deftypefn  {Function file} {@var{prom} =} prominence(@var{data})
+## @deftypefnx {Function file} {@var{prom} =} prominence(@var{data}, @var{loc})
+## @deftypefnx {Function file} {[@var{prom}, @var{isol}] =} prominence(@dots{})
 ## Return the prominence of peaks at @var{loc} in @var{data}.
 ##
 ## @var{loc} can be either indices of the peaks in @var{data} or a logical
-## array specifying the peaks.
+## array specifying the peaks. If omitted, it defaults to all peaks.
 ##
 ## The optional return value @var{isol} is a two-column matrix containing
 ## at each row the interval of isolation of a corresponding peak in @var{prom}.
