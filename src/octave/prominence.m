@@ -261,10 +261,11 @@ function [prom pks] = prominence_loopall(y)
 #			warning("Peak %d has the same height as peak %d\n", rpk(k), k);
 			hh = find(h > h(k));        # Indices of higher peaks
 			nhi = min(hh(hh > k));      # Index of next strictly higher peak
-#			if (isempty(nhi))
-#				nhi = peaks(end);
-#			endif
-			f = k:lpk(nhi);
+			if (!isempty(nhi))
+				f = k:lpk(nhi);
+			else
+				f = k:length(h);
+			endif
 			f(h(f) < h(k)) = [];        # Indices of peaks in the sequence
 			vg = [lv(f); rv(f(end))];
 			vgi = 1;
@@ -352,6 +353,9 @@ endfunction
 
 %!# Subsequent peaks of equal height (affects loopall algorithm)
 %!assert(prominence([5 6 3 3 7 5 5 7 5 2 7 6 3 4 11 17 8 0]), [1 4 4 4 15]');
+%!# Various pitfalls discovered in loopall
+%!assert(prominence([1 2 1 2 1]), [1 1]');
+%!assert(prominence([1 3 -2 2 -1 3 1]), [2 3 2]');
 
 %!# Extract the isolation interval output value
 %!function isol = isol(y, p)
