@@ -14,19 +14,9 @@
 ## along with this program; see the file COPYING.  If not, see
 ## <https://www.gnu.org/licenses/>.
 
-## -*- texinfo -*-
-## @deftypefn  {Function file} {@var{prom} =} prominence(@var{data}, @var{loc})
-## @deftypefnx {Function file} {[@var{prom}, @var{isol}] =} prominence(@var{data}, @var{loc})
-## Return the prominence of peaks at @var{loc} in @var{data}.
-##
-## @var{loc} can be either indices of the peaks in @var{data} or a logical
-## array specifying the peaks.
-##
-## The optional return value @var{isol} is a two-column matrix containing
-## at each row the interval of isolation of a corresponding peak in @var{prom}.
-## The value in the first column is the lower bound, while the value in the
-## second column is the upper bound of the interval.
-## @end deftypefn
+## An old implementation of prominence. This uses a naive algorithm,
+## which is considered correct due to its simplicity.
+## This is used to test newer implementations of prominence for correctness.
 
 ## Author: Jan "Singon" Slany <singond@seznam.cz>
 ## Created: October 2019
