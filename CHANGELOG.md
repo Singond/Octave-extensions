@@ -1,6 +1,15 @@
 Changelog
 =========
 
+[Unreleased]
+------------
+### Changed
+- Re-implemented `prominence`. By default, the function now uses a new
+  algorithm which performs better on large data with many peaks.
+  The old algorithm is still used if the isolation interval is to be
+  calculated.
+- Endpoints of data are no more considered peaks in `prominence`.
+
 [0.1.2] - 2019-12-03
 --------------------
 ### Changed
