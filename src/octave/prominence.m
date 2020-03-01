@@ -50,6 +50,18 @@ function [prom, isol] = prominence(y, loc)
 		loc = [];       # Calculate all peaks
 	endif
 
+	maxindex = length(y);
+	if (any(loc==1))
+		error("The value at index 1 is not a peak");
+	elseif (any(loc==maxindex))
+		error("The value at index %d is not a peak", maxindex);
+	else
+		outofrange = (loc < 1 || loc > maxindex);
+		if (any(outofrange))
+			error("Index %d is out of bounds (%d)", find(outofrange), maxindex)
+		endif
+	endif
+
 	if (nargout > 1)
 		## If isolation interval is requested, we need the naive algorithm
 		algorithm = "naive";
@@ -314,8 +326,8 @@ endfunction
 %!	assert(prominence(A,  logical(p)),  [7 2 8]');
 
 %!# Prominence of left edge
-%!#assert(prominence([5 4 8 7 2 1 4 2 5 9 1],  1),  1); # TODO: Consider edges as peaks?
-%!#assert(prominence([10 4 8 7 2 1 4 2 5 9 1], 1),  9); # TODO: Consider edges as peaks?
+%!error <The value at index 1 is not a peak> prominence([5 4 8 7 2 1 4 2 5 9 1],  1);
+%!error <The value at index 1 is not a peak> prominence([10 4 8 7 2 1 4 2 5 9 1], 1);
 %!
 %!# Prominence of midpoints
 %!assert(prominence([1 4 8 7 2 1 4 2 5 9 1],  3),  7);
@@ -333,7 +345,7 @@ endfunction
 %!	assert(prominence(A, A > 8), 8);
 %!
 %!# Prominence of right edge
-%!#assert(prominence([1 4 8 7 2 1 4 2 5 9 10], 11), 9); # TODO: Consider edges as peaks?
+%!error <The value at index 11 is not a peak> prominence([1 4 8 7 2 1 4 2 5 9 10], 11);
 
 %!# Prominence of flat peaks
 %!assert(prominence([1 4 4 1], 2), 3);
@@ -362,10 +374,6 @@ endfunction
 %!	[~, isol] = prominence(y, p);
 %!endfunction
 %!
-%!# Behaviour at left edge
-%!assert(isol([5 4 8 7 2 1 4 2 5 9 1],  1),  [1 3]);
-%!assert(isol([10 4 8 7 2 1 4 2 5 9 1], 1),  [1 11]);
-%!
 %!# Peaks not at endpoints
 %!assert(isol([1 4 8 7 2 1 4 2 5 9 1],  3),  [1 10]);
 %!assert(isol([1 4 8 7 2 1 4 2 5 9 1],  7),  [4 9]);
@@ -375,6 +383,3 @@ endfunction
 %!assert(isol([1 4 8 7 2 1 4 2 5 9 1],  [3 7 10]'), [1, 10; 4, 9; 1, 11]);
 %!assert(isol([1 4 8 7 2 1 4 2 5 9 1]', [3 7 10]),  [1, 10; 4, 9; 1, 11]);
 %!assert(isol([1 4 8 7 2 1 4 2 5 9 1]', [3 7 10]'), [1, 10; 4, 9; 1, 11]);
-%!
-%!# Behaviour at right edge
-%!assert(isol([1 4 8 7 2 1 4 2 5 9 10], 11), [1 11]);
