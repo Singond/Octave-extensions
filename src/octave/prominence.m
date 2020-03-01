@@ -76,6 +76,7 @@ function [prom, isol] = prominence(y, loc)
 			else
 				if (isempty(loc))
 					[~, loc] = findpeaksp(y);
+					loc = loc';
 				endif
 				[prom, isol] = arrayfun(@(p) prominence_point(y, p), loc, ...
 						"UniformOutput", false);
