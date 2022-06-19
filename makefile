@@ -17,16 +17,20 @@
 VERSION := 0.1.2
 NAME := singon-ext
 
+build_dir   := build
 DIST_NAME   := ${NAME}-${VERSION}.tar.gz
-DIST_TMPDIR := build/pkg/${NAME}
+dist_path   := ${build_dir}/${DIST_NAME}
+DIST_TMPDIR := ${build_dir}/pkg/${NAME}
 
 SOURCES := $(shell find src -type f)
 FILES_OCTAVE := $(patsubst src/octave/%,${DIST_TMPDIR}/inst/%,$(shell find src/octave -type f))
 FILES_META   := $(patsubst src/meta/%,${DIST_TMPDIR}/%,$(shell find src/meta -type f)) ${DIST_TMPDIR}/COPYING
 
+test_install = ${build_dir}/test-install
+
 .PHONY: dist clean uninstall
 
-dist: build/${DIST_NAME}
+dist: ${dist_path}
 
 build/${DIST_NAME}: ${FILES_OCTAVE} ${FILES_META}
 	@echo "Packaging for distribution..."
@@ -60,3 +64,16 @@ uninstall:
 	@echo "Uninstalling local Octave package..."
 	octave-cli --silent --eval 'pkg uninstall ${NAME}'
 
+.PHONY: run
+run: ${test_install} ${test_install}/.packages
+	octave --persist \
+		--eval 'pkg prefix ${test_install} ${test_install};' \
+		--eval 'pkg local_list ${test_install}/.packages;' \
+		--eval 'pkg install ${dist_path};' \
+		--eval 'pkg load ${NAME};'
+
+${test_install}:
+	mkdir -p $@
+
+${test_install}/.packages: ${test_install}
+	touch $@
