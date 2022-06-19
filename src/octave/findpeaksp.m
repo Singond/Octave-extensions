@@ -28,10 +28,14 @@
 ## Options (@var{option}, @dots{}) are specified after the
 ## required arguments. Currently, only the following flag is supported:
 ## @table @asis
+##
 ## @item Ascending
 ## When sorting the peaks in the return value (see below), the default sort
 ## order is @emph{descending} (ie. from highest to lowest, from most prominent
 ## to least prominent, etc.). Use this switch to reverse that direction.
+##
+## @item Annotate
+## When plotting, mark the peak height and width by lines.
 ## @end table
 ##
 ## Further options can be specified as key-value pairs. In each pair, the
