@@ -1,8 +1,11 @@
 Changelog
 =========
 
-[Unreleased]
-------------
+[0.2.0] - 2022-10-02
+--------------------
+### Added
+- The `animate` function.
+
 ### Changed
 - Re-implemented `prominence`. By default, the function now uses a new
   algorithm which performs better on large data with many peaks.

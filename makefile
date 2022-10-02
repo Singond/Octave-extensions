@@ -14,7 +14,7 @@
 # along with this program; see the file COPYING.  If not, see
 # <https://www.gnu.org/licenses/>.
 
-VERSION := 0.1.2
+VERSION := 0.2.0
 NAME := singon-ext
 
 build_dir   := build
