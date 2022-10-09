@@ -15,8 +15,8 @@
 ## <https://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function file} {w =} peakwidth(data, loc, h)
-## @deftypefnx {Function file} {[w, ext] =} peakwidth(data, loc, h)
+## @deftypefn  {} {w =} peakwidth(data, loc, h)
+## @deftypefnx {} {[w, ext] =} peakwidth(data, loc, h)
 ## Return the width of peaks located at indices @var{loc} in @var{data},
 ## measured at reference height @var{h}.
 ##
