@@ -1,14 +1,18 @@
 Changelog
 =========
 
-[Unreleased]
-------------
+[0.2.2] - 2022-12-28
+--------------------
 ### Added
 - Missing license in the `animate` function header.
 
 ### Changed
 - Unified the style of all function headers. The words "Function file"
   have been removed and a blank line has been added after the synopsis.
+
+[0.2.1] - 2022-12-28 [YANKED]
+-----------------------------
+Removed due to missing version data in sources.
 
 [0.2.0] - 2022-10-02
 --------------------
