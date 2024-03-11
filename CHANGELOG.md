@@ -1,6 +1,12 @@
 Changelog
 =========
 
+[0.3.0] - 2024-03-11
+--------------------
+### Added
+- Matrix version of `polyfit` from standard library.
+  See `polyfitm`.
+
 [0.2.2] - 2022-12-28
 --------------------
 ### Added
