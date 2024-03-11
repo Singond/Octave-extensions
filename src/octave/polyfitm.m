@@ -85,15 +85,30 @@ function p = polyfitm(x, y, n, dim=1)
 	## Process each column of the flattened array
 	pcols = max([xcols ycols]);
 	p = zeros(prows, pcols);
-	for c = 1:pcols;
-		cx = cy = c;
-		if (xcols == 1)
-			cx = 1;
+	if (xcols == 1)
+		## Compute manually to reuse the QR factorization.
+		## See {@code help qr} for more information.
+		## Using the permutation matrix P makes this run much faster.
+		X = vander(x, prows);
+		if (islogical(n))
+			X = X(:,n);
 		end
-		if (ycols == 1)
-			cy = 1;
+		[Q, R, P] = qr(X, "econ");
+		for c = 1:pcols
+			cy = c;
+			if (ycols == 1)
+				cy = 1;
+			end
+			p(P,c) = R \ (Q' * y(:,cy));
 		end
-		p(:,c) = polyfit(x(:,cx), y(:,cy), n);
+	else
+		for c = 1:pcols;
+			cx = cy = c;
+			if (ycols == 1)
+				cy = 1;
+			end
+			p(:,c) = polyfit(x(:,cx), y(:,cy), n);
+		end
 	end
 
 	## Make the result match the input in dimensions
