@@ -14,7 +14,7 @@
 # along with this program; see the file COPYING.  If not, see
 # <https://www.gnu.org/licenses/>.
 
-VERSION := 0.2.2
+VERSION != grep "Version:" src/meta/DESCRIPTION | cut -d" " -f2
 NAME := singon-ext
 
 build_dir   := build
@@ -40,14 +40,9 @@ ${FILES_OCTAVE}: ${DIST_TMPDIR}/inst/%: src/octave/%
 	@mkdir -p $(dir $@)
 	cp $< $@
 
-$(filter-out %/DESCRIPTION %/COPYING,${FILES_META}): ${DIST_TMPDIR}/%: src/meta/%
+$(filter-out %/COPYING,${FILES_META}): ${DIST_TMPDIR}/%: src/meta/%
 	@mkdir -p $(dir $@)
 	cp $< $@
-
-${DIST_TMPDIR}/DESCRIPTION: src/meta/DESCRIPTION makefile
-	@mkdir -p $(dir $@)
-	cp $< $@
-	sed -i "s/VAR_VERSION/${VERSION}/" ${DIST_TMPDIR}/DESCRIPTION
 
 ${DIST_TMPDIR}/COPYING: COPYING
 	@mkdir -p $(dir $@)
