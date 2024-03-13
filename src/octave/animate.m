@@ -35,8 +35,8 @@
 ## @end deftypefn
 
 ## Author: Jan "Singon" Slany <singond@seznam.cz>
-## Created: October 2019
-## Keywords: signal processing, peak finding
+## Created: October 2022
+## Keywords: image processing, animation
 function animate(img, framelength = 1, varargin)
 	nframes = size(img, 3);
 
