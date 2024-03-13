@@ -25,6 +25,8 @@
 ## of matrices @var{x} and @var{y}.
 ##
 ## If @var{dim} is given, operate along that dimension instead of columns.
+##
+## @seealso{polyfit}
 ## @end deftypefn
 
 ## Author: Jan "Singon" Slany <singond@seznam.cz>

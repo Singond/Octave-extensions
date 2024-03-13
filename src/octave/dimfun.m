@@ -42,6 +42,8 @@
 ## The size in dimension @var{dim} is the number of elements
 ## in the return value of @var{fcn}, which must be the same
 ## for each invocation.
+##
+## @seealso{arrayfun, cellfun}
 ## @end deftypefn
 
 ## Author: Jan "Singon" Slany <singond@seznam.cz>

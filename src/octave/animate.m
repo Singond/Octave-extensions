@@ -32,6 +32,8 @@
 ##
 ## The frames are displayed using @code{imshow}.
 ## Any unmatched arguments are passed to this function.
+##
+## @seealso{imshow}
 ## @end deftypefn
 
 ## Author: Jan "Singon" Slany <singond@seznam.cz>

@@ -106,6 +106,8 @@
 ##
 ## When called without output arguments, @code{findpeaksp} plots the data
 ## with peaks highlighted.
+##
+## @seealso{peakwidth, prominence, findpeaks}
 ## @end deftypefn
 
 ## Author: Jan "Singon" Slany <singond@seznam.cz>
