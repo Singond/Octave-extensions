@@ -1,6 +1,18 @@
 Changelog
 =========
 
+[0.4.0] - 2024-03-13
+--------------------
+### Added
+- A utility function `dimfun` to apply arbitrary function on vectors
+  of an array, analogous to what `arrayfun` does on single elements.
+
+### Changed
+- Made minor edits to function documentation.
+
+### Fixed
+- Corrected wrong information in function header.
+
 [0.3.0] - 2024-03-11
 --------------------
 ### Added
