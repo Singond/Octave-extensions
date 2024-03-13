@@ -15,10 +15,10 @@
 ## <https://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {} {[@var{pks}, @var{locs}] =} findpeaksp(@var{data})
-## @deftypefnx {} {[@dots{}] =} findpeaksp(@dots{}, @var{option}, @dots{})
-## @deftypefnx {} {[@dots{}] =} findpeaksp(@dots{}, @var{param1}, @var{value1}, @dots{})
-## @deftypefnx {} {} findpeaksp(@dots{})
+## @deftypefn  {} {[@var{pks}, @var{locs}] =} findpeaksp (@var{data})
+## @deftypefnx {} {[@dots{}] =} findpeaksp (@dots{}, @var{option}, @dots{})
+## @deftypefnx {} {[@dots{}] =} findpeaksp (@dots{}, @var{param1}, @var{value1}, @dots{})
+## @deftypefnx {} {} findpeaksp (@dots{})
 ##
 ## Find local maxima in @var{data}.
 ##

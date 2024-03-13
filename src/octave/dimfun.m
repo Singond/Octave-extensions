@@ -15,8 +15,8 @@
 ## <https://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {} {@var{B} =} dimfun(@var{fcn}, @var{dim}, @var{A})
-## @deftypefnx {} {@var{B} =} dimfun(@var{fcn}, @var{dim}, @var{A1}, @
+## @deftypefn  {} {@var{B} =} dimfun (@var{fcn}, @var{dim}, @var{A})
+## @deftypefnx {} {@var{B} =} dimfun (@var{fcn}, @var{dim}, @var{A1}, @
 ##     @var{A2}, @dots{})
 ##
 ## Evaluate a function on each vector of an array.
