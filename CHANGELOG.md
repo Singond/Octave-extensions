@@ -1,6 +1,12 @@
 Changelog
 =========
 
+[0.4.1] - 2024-03-14
+--------------------
+### Changed
+- Made `polyfitm` compatible with older versions of Octave
+  (where `qr` does not know the `"econ"` parameter).
+
 [0.4.0] - 2024-03-13
 --------------------
 ### Added

@@ -95,7 +95,7 @@ function p = polyfitm(x, y, n, dim=1)
 		if (islogical(n))
 			X = X(:,n);
 		end
-		[Q, R, P] = qr(X, "econ");
+		[Q, R, P] = qr(X, 0); ## Same as qr(X, "econ"), but backwards-compatible
 		for c = 1:pcols
 			cy = c;
 			if (ycols == 1)
