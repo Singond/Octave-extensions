@@ -54,17 +54,26 @@ function animate(img, framelength = 1, varargin)
 		endif
 	endwhile
 
-	h = imshow(img(:,:,1), unmatched{:});
-	ax = gca();
-	f = 0;
-	while (++f <= nframes)
-		set(h, "cdata", img(:,:,f));
-		title(sprintf("frame %d", f));
-		if (loop && f == nframes)
-			f = 0;
-		endif
-		if (framelength > 0)
-			pause(framelength);
-		endif
-	endwhile
+##	h = imshow(img(:,:,1), unmatched{:});
+##	ax = gca();
+
+	paused = false;
+
+##	function pause
+##	uicontrol(f1, "string", "Pause", "position", [10 10 120 30],
+##		"callback", @() paused = true);
+
+	player = VideoPlayer(img);
+	player.play();
+##	f = 0;
+##	while (!paused && ++f <= nframes)
+##		set(h, "cdata", img(:,:,f));
+##		title(sprintf("frame %d", f));
+##		if (loop && f == nframes)
+##			f = 0;
+##		endif
+##		if (framelength > 0)
+##			pause(framelength);
+##		endif
+##	endwhile
 endfunction
