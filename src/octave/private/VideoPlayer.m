@@ -21,9 +21,10 @@
 ## @end deftp
 classdef VideoPlayer < handle
 	properties
-		data
-		fig
-		plt
+		data;
+		fig;
+		plt;
+		ax;
 		frame = 0;
 		paused = false;
 		loop = true;
@@ -33,6 +34,8 @@ classdef VideoPlayer < handle
 		backwardbtn;
 		pausebtn;
 		loopcontrol;
+		rangeedit1;
+		rangeedit2;
 	end
 
 	methods
@@ -52,10 +55,8 @@ classdef VideoPlayer < handle
 			p.framerate = ip.Results.framerate;
 			p.frameduration = 1 / ip.Results.framerate;
 			imshowargs = {};
-			if (!isempty((value = ip.Results.displayrange)))
-				imshowargs{end+1} = "displayrange";
-				imshowargs{end+1} = value;
-			end
+			imshowargs{end+1} = "displayrange";
+			imshowargs{end+1} = ip.Results.displayrange;
 			if (!isempty((value = ip.Results.colormap)))
 				imshowargs{end+1} = "colormap";
 				imshowargs{end+1} = value;
@@ -71,6 +72,7 @@ classdef VideoPlayer < handle
 
 			p.plt = imshow(p.data(:,:,1), imshowargs{:});
 			p.fig = gcf;
+			p.ax = get(p.fig, "currentaxes");
 
 			panel = uipanel(p.fig,
 				"units", "pixels",
@@ -96,6 +98,22 @@ classdef VideoPlayer < handle
 				"value", p.loop,
 				"position", [240 10 50 30],
 				"callback", @(hsrc, evt) p.setloop);
+			range = get(p.ax, "clim");
+			uicontrol(panel,
+				"style", "text",
+				"string", "Range:",
+				"horizontalalignment", "right",
+				"position", [300 10 50 30]);
+			p.rangeedit1 = uicontrol(panel,
+				"style", "edit",
+				"string", num2str(range(1)),
+				"position", [360 10 50 30],
+				"callback", @(hsrc, evt) p.setrange);
+			p.rangeedit2 = uicontrol(panel,
+				"style", "edit",
+				"string", num2str(range(2)),
+				"position", [420 10 50 30],
+				"callback", @(hsrc, evt) p.setrange);
 		end
 
 		function play(p)
@@ -158,6 +176,16 @@ classdef VideoPlayer < handle
 
 		function setloop(p)
 			p.loop = get(gcbo, "value");
+		end
+
+		function setrange(p)
+			low = get(p.rangeedit1, "string");
+			high = get(p.rangeedit2, "string");
+			low = str2num(low);
+			high = str2num(high);
+			if (!isempty(low) && !isempty(high))
+				set(p.ax, "clim", [low high]);
+			endif
 		end
 	end
 
