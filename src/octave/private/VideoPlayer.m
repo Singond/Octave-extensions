@@ -27,17 +27,50 @@ classdef VideoPlayer < handle
 		frame = 0;
 		paused = false;
 		loop = true;
-		framelength = 0.1;
+		framerate = 10;
+		frameduration = 0.1;
 		forwardbtn;
 		backwardbtn;
 		pausebtn;
 	end
 
 	methods
-		function p = VideoPlayer(data)
-			p.data = data;
-			p.plt = imshow(data(:,:,1), []);
+		function p = VideoPlayer(varargin)
+			ip = inputParser;
+			ip.addRequired("data");
+			ip.addSwitch("loop");
+			ip.addParameter("framerate", 10, @(v) isnumeric(v) && isscalar(v));
+			ip.addParameter("displayrange", [], @isnumeric);
+			ip.addParameter("colormap", []);
+			ip.addParameter("xdata", [], @isnumeric);
+			ip.addParameter("ydata", [], @isnumeric);
+			ip.parse(varargin{:});
+
+			p.data = ip.Results.data;
+			p.loop = ip.Results.loop;
+			p.framerate = ip.Results.framerate;
+			p.frameduration = 1 / ip.Results.framerate;
+			imshowargs = {};
+			if (!isempty((value = ip.Results.displayrange)))
+				imshowargs{end+1} = "displayrange";
+				imshowargs{end+1} = value;
+			end
+			if (!isempty((value = ip.Results.colormap)))
+				imshowargs{end+1} = "colormap";
+				imshowargs{end+1} = value;
+			end
+			if (!isempty((value = ip.Results.xdata)))
+				imshowargs{end+1} = "xdata";
+				imshowargs{end+1} = value;
+			end
+			if (!isempty((value = ip.Results.ydata)))
+				imshowargs{end+1} = "ydata";
+				imshowargs{end+1} = value;
+			end
+
+			p.plt = imshow(p.data(:,:,1), imshowargs{:});
 			p.fig = gcf;
+
 			panel = uipanel(p.fig,
 				"units", "pixels",
 				"position", [0 0 600 50]);
@@ -69,8 +102,8 @@ classdef VideoPlayer < handle
 					p.frame = 1;
 				endif
 				p.setframe(p.frame);
-				if (p.framelength > 0)
-					pause(p.framelength);
+				if (p.frameduration > 0)
+					pause(p.frameduration);
 				endif
 			endwhile
 		end
