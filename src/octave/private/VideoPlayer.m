@@ -33,6 +33,7 @@ classdef VideoPlayer < handle
 		forwardbtn;
 		backwardbtn;
 		pausebtn;
+		rateedit;
 		loopcontrol;
 		rangeedit1;
 		rangeedit2;
@@ -76,43 +77,53 @@ classdef VideoPlayer < handle
 
 			panel = uipanel(p.fig,
 				"units", "pixels",
-				"position", [0 0 600 50]);
+				"position", [0 0 640 50]);
 			p.backwardbtn = uicontrol(panel,
 				"style", "pushbutton",
 				"string", "<",
-				"position", [190 10 40 30],
+				"position", [210 10 40 30],
 				"callback", @(hsrc, evt) p.stepbackward);
 			p.pausebtn = uicontrol(panel,
 				"style", "pushbutton",
 				"string", "Pause",
-				"position", [240 10 120 30],
+				"position", [260 10 120 30],
 				"callback", @(hsrc, evt) p.togglepause);
 			p.forwardbtn = uicontrol(panel,
 				"style", "pushbutton",
 				"string", ">",
-				"position", [370 10 40 30],
+				"position", [390 10 40 30],
 				"callback", @(hsrc, evt) p.stepforward);
+			uicontrol(panel,
+				"style", "text",
+				"string", "Framerate:",
+				"horizontalalignment", "right",
+				"position", [10 10 70 30]);
+			p.rateedit = uicontrol(panel,
+				"style", "edit",
+				"string", num2str(p.framerate),
+				"position", [90 10 50 30],
+				"callback", @(hsrc, evt) p.setframerate);
 			p.loopcontrol = uicontrol(panel,
 				"style", "checkbox",
 				"string", "Loop",
 				"value", p.loop,
-				"position", [10 10 50 30],
+				"position", [150 10 50 30],
 				"callback", @(hsrc, evt) p.setloop);
 			range = get(p.ax, "clim");
 			uicontrol(panel,
 				"style", "text",
 				"string", "Range:",
 				"horizontalalignment", "right",
-				"position", [420 10 50 30]);
+				"position", [460 10 50 30]);
 			p.rangeedit1 = uicontrol(panel,
 				"style", "edit",
 				"string", num2str(range(1)),
-				"position", [480 10 50 30],
+				"position", [520 10 50 30],
 				"callback", @(hsrc, evt) p.setrange);
 			p.rangeedit2 = uicontrol(panel,
 				"style", "edit",
 				"string", num2str(range(2)),
-				"position", [540 10 50 30],
+				"position", [580 10 50 30],
 				"callback", @(hsrc, evt) p.setrange);
 		end
 
@@ -176,6 +187,15 @@ classdef VideoPlayer < handle
 
 		function setloop(p)
 			p.loop = get(gcbo, "value");
+		end
+
+		function setframerate(p)
+			rate = get(p.rateedit, "string");
+			rate = str2num(rate);
+			if (!isempty(rate))
+				p.framerate = rate;
+				p.frameduration = 1 / rate;
+			endif
 		end
 
 		function setrange(p)
