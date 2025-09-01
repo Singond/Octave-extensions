@@ -32,6 +32,7 @@ classdef VideoPlayer < handle
 		forwardbtn;
 		backwardbtn;
 		pausebtn;
+		loopcontrol;
 	end
 
 	methods
@@ -89,6 +90,12 @@ classdef VideoPlayer < handle
 				"string", ">",
 				"position", [190 10 40 30],
 				"callback", @(hsrc, evt) p.stepforward);
+			p.loopcontrol = uicontrol(panel,
+				"style", "checkbox",
+				"string", "Loop",
+				"value", p.loop,
+				"position", [240 10 50 30],
+				"callback", @(hsrc, evt) p.setloop);
 		end
 
 		function play(p)
@@ -147,6 +154,10 @@ classdef VideoPlayer < handle
 				end
 			end
 			p.setframe(p.frame);
+		end
+
+		function setloop(p)
+			p.loop = get(gcbo, "value");
 		end
 	end
 
