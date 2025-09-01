@@ -80,39 +80,39 @@ classdef VideoPlayer < handle
 			p.backwardbtn = uicontrol(panel,
 				"style", "pushbutton",
 				"string", "<",
-				"position", [10 10 40 30],
+				"position", [190 10 40 30],
 				"callback", @(hsrc, evt) p.stepbackward);
 			p.pausebtn = uicontrol(panel,
 				"style", "pushbutton",
 				"string", "Pause",
-				"position", [60 10 120 30],
+				"position", [240 10 120 30],
 				"callback", @(hsrc, evt) p.togglepause);
 			p.forwardbtn = uicontrol(panel,
 				"style", "pushbutton",
 				"string", ">",
-				"position", [190 10 40 30],
+				"position", [370 10 40 30],
 				"callback", @(hsrc, evt) p.stepforward);
 			p.loopcontrol = uicontrol(panel,
 				"style", "checkbox",
 				"string", "Loop",
 				"value", p.loop,
-				"position", [240 10 50 30],
+				"position", [10 10 50 30],
 				"callback", @(hsrc, evt) p.setloop);
 			range = get(p.ax, "clim");
 			uicontrol(panel,
 				"style", "text",
 				"string", "Range:",
 				"horizontalalignment", "right",
-				"position", [300 10 50 30]);
+				"position", [420 10 50 30]);
 			p.rangeedit1 = uicontrol(panel,
 				"style", "edit",
 				"string", num2str(range(1)),
-				"position", [360 10 50 30],
+				"position", [480 10 50 30],
 				"callback", @(hsrc, evt) p.setrange);
 			p.rangeedit2 = uicontrol(panel,
 				"style", "edit",
 				"string", num2str(range(2)),
-				"position", [420 10 50 30],
+				"position", [540 10 50 30],
 				"callback", @(hsrc, evt) p.setrange);
 		end
 
