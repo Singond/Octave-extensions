@@ -1,4 +1,4 @@
-## Copyright (C) 2022 Jan Slany
+## Copyright (C) 2022, 2025 Jan Slany
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -16,22 +16,25 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {} {} animate (@var{img})
-## @deftypefnx {} {} animate (@var{img}, @var{framelength})
+## @deftypefnx {} {} animate (@dots{}, @qcode{"framerate"}, @var{frate})
+## @deftypefnx {} {} animate (@dots{}, @qcode{"displayrange"}, [@var{lo} @var{hi}])
+## @deftypefnx {} {} animate (@dots{}, @qcode{"colormap"}, @var{cmap})
+## @deftypefnx {} {} animate (@dots{}, @qcode{"xdata"}, @var{xdata})
+## @deftypefnx {} {} animate (@dots{}, @qcode{"ydata"}, @var{ydata})
 ## @deftypefnx {} {} animate (@dots{}, @qcode{"loop"})
-## @deftypefnx {} {} animate (@dots{}, @var{args})
 ##
 ## Display a sequence of images @var{img} as an animation.
 ##
 ## The image sequence @var{img} should be a 3D array where individual
 ## frames are stacked along the last dimension.
-## The delay between images in seconds can be set by @var{framelength}.
-## If it is not seet, a default delay of 1 second is used.
+## The framerate in images per second can be set by @var{frate}.
+## If it is not set, a default delay of 10 images per second is used.
 ##
 ## Automatic looping can be set by the @qcode{"loop"} option.
 ## If set, the animation restarts after reaching the last frame.
 ##
-## The frames are displayed using @code{imshow}.
-## Any unmatched arguments are passed to this function.
+## The parameters @qcode{"displayrange"}, @qcode{"colormap"},
+## @qcode{"xdata"} and @qcode{"ydata"} do the same thing as in @code{imshow}.
 ##
 ## @seealso{imshow}
 ## @end deftypefn
@@ -39,32 +42,7 @@
 ## Author: Jan "Singon" Slany <singond@seznam.cz>
 ## Created: October 2022
 ## Keywords: image processing, animation
-function animate(img, framelength = 1, varargin)
-	nframes = size(img, 3);
-
-	unmatched = {};
-	loop = false;
-	n = 0;
-	while (++n <= numel(varargin))
-		arg = varargin{n};
-		if (strcmp(arg, "loop"))
-			loop = true;
-		else
-			unmatched{end + 1} = arg;
-		endif
-	endwhile
-
-	h = imshow(img(:,:,1), unmatched{:});
-	ax = gca();
-	f = 0;
-	while (++f <= nframes)
-		set(h, "cdata", img(:,:,f));
-		title(sprintf("frame %d", f));
-		if (loop && f == nframes)
-			f = 0;
-		endif
-		if (framelength > 0)
-			pause(framelength);
-		endif
-	endwhile
+function animate(img, varargin)
+	player = VideoPlayer(img, varargin{:});
+	player.play();
 endfunction
